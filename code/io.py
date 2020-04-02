@@ -10,11 +10,16 @@ from tqdm import tqdm, trange
 
 class io:
     """
-    Object to store task data
+    Object to store:
+        Import/Output Methods
+        Task Data in dictionary 'tasks' as DataLoader objects
     """
-    def __init__(self,data_dir, task_dir):
+    def __init__(self,
+                 data_dir, # String of the directory storing all tasks
+                 task_dir  # Array of task directories, should match 'tasks' keys
+                 ):
         data_dir = data_dir
-        task_dir = task_dir
+        task_dir = task_dir    
         tasks = {
             "squad"             : 1,
             "triviaqa"          : 2,
@@ -26,10 +31,19 @@ class io:
 
     def import_data(self):
         """
-        Import testing data
-        """    
+        Import data, preprocess, and store as DataLoader objects in
+        'self.tasks' dictionary
+        
+        Can reference MRQA script
+        """
+        
+        for task in self.task_dir:
+            #[Implement load data]
+            
+            temp = DataLoader(...)
+            self.tasks[task] = temp
 
-def export_results():
-    """
-    Export results of analysis
-    """
+    def export_results(self):
+        """
+        Export results of analysis
+        """

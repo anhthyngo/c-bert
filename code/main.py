@@ -12,12 +12,12 @@ from tqdm import tqdm, trange
 import argparse
 
 # =============== Self Defined ===============
-import io
-import utils
-import model
-import main_learning
-import cont_learning
-import analyze
+import io            # module for handling import/export of data
+import utils         # utility functions for training and and evaluating
+import model         # module to define model architecture
+import meta_learning # module for meta-learning (OML)
+import cont_learning # module for continual learning
+import analyze       # module for analyzing results
 
 args = argparse.ArgumentParser()
 args.add_argument('--data', type=str, default='/data',
@@ -34,10 +34,33 @@ args.add_argument('--lr', type=float, default=20,
                     help='initial learning rate')
 args.add_argument('--batch_size', type=int, default=20,
                     help='batch size')
-args.add_argument('--dropout', type=float, default=0.2,
-                    help='dropout applied to layers (0 = no dropout)')
+#args.add_argument('--dropout', type=float, default=0.2,
+#                    help='dropout applied to layers (0 = no dropout)')
 args.add_argument('--seed', type=int, default=1111,
                     help='random seed')
 args.add_argument('--model', type=str, default='BERT',
                     help='name of RLN network. default is BERT')
 
+# create io object to import data
+
+# define models
+
+# continual learning for baseline BERT
+
+# meta-learning to get Meta-BERT
+
+# continual learning for Meta-BERT
+
+# analyze results from continual learning steps
+
+# save results with io
+
+
+"""
+model = model.model(...)
+model_meta = model.model(...)
+optimizer = opt.Adam(model.parameters, arguments)
+optimizer_rln = opt.Adam(model_meta.representation.parameters, arguments)
+optimizer_pln = opt.Adam(model_meta.classification.parameters, arguments)
+loss = nn.NLLLoss(arguments)
+"""

@@ -14,7 +14,7 @@ print(trivia)
 print(squad)
 
 # Test plotting
-plot = analyze.plot_learning(trivia, squad, "BERT", iterations=10, max_score=10, x_tick_int=2, y_tick_int=1)
+plot = analyze.plot_learning(trivia, squad, "Meta-BERT", iterations=10, max_score=10, x_tick_int=2, y_tick_int=1)
 
 # Tryout displaying and saving plot
 #

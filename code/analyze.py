@@ -15,7 +15,7 @@ def plot_learning(
         offset = 10,                     # pixel offset for axes
         label_x_offset = 0.2,            # x direction offset for label
         label_y_offset = 0.1,            # y direction offset for label
-        x_size = 8,                      # x size of figure
+        x_size = 10,                     # x size of figure
         y_size = 5,                      # y size of figure
         x_label = "training iteration",  # name for x-axis
         x_tick_int = 20000,              # interval for ticks on x-axis
@@ -23,10 +23,10 @@ def plot_learning(
         y_label = "score",               # name for y-axis
         y_tick_int = 20,                 # interval for ticks on y-axis
         max_score = 100,                 # max score
-        trivia_name = "Trivia F1",       # name for TriviaQA label
+        trivia_name = "Trivia F1",        # name for TriviaQA label
         trivia_color = "mediumseagreen", # color for TriviaQA
         trivia_marker = "o",             # marker for TriviaQA
-        squad_name = "SQuAD F1",         # name for SQuAD label
+        squad_name = "SQuAD F1",            # name for SQuAD label
         squad_color = "orange",          # color for SQuAD
         squad_marker = "^"               # marker for SQuAD
         ):
@@ -35,8 +35,8 @@ def plot_learning(
     """
     
     # Create plot figure
-    fig = plt.figure(figsize = (x_size, y_size))
-    ax = fig.gca()
+    fig = plt.figure(figsize = (x_size, y_size), constrained_layout=True)
+    ax = fig.add_subplot(111)
     
     # Get x and y values for data
     trivia_iter = trivia.get("iter")

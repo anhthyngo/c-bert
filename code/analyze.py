@@ -7,10 +7,25 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
+colors = {
+        "BERT Trivia": "mediumseagreen",
+        "BERT SQuAD": "orange",
+        "Meta-BERT Trivia": "tab:blue",
+        "Meta-BERT SQuAD": "tab:pink"
+        }
+
+markers = {
+        "BERT Trivia": "o",
+        "BERT SQuAD": "^",
+        "Meta-BERT Trivia": "P",
+        "Meta-BERT SQuAD": "X"
+        }
+
 def plot_learning(
-        trivia,                          # dictionary for TriviaQA validation F1 scores
-        squad,                           # dictionary for SQuAD validation F1 scores
-        model_name,                      # name of model used
+        data,                            # dictionary of dictionaries of data
+        iter_key = "iter",               # iteration key word
+        val_key = "val",                 # validation key word
+        score_type = "F1",               # score type for label name
         linewidth = 1.0,                 # linewidth for plot
         offset = 10,                     # pixel offset for axes
         label_x_offset = 0.2,            # x direction offset for label
@@ -22,13 +37,7 @@ def plot_learning(
         iterations = 100000,             # max number of training iterations
         y_label = "score",               # name for y-axis
         y_tick_int = 20,                 # interval for ticks on y-axis
-        max_score = 100,                 # max score
-        trivia_name = "Trivia F1",        # name for TriviaQA label
-        trivia_color = "mediumseagreen", # color for TriviaQA
-        trivia_marker = "o",             # marker for TriviaQA
-        squad_name = "SQuAD F1",            # name for SQuAD label
-        squad_color = "orange",          # color for SQuAD
-        squad_marker = "^"               # marker for SQuAD
+        max_score = 100                  # max score
         ):
     """
     Generate plot like Yogatama for continual learning
@@ -37,23 +46,6 @@ def plot_learning(
     # Create plot figure
     fig = plt.figure(figsize = (x_size, y_size), constrained_layout=True)
     ax = fig.add_subplot(111)
-    
-    # Get x and y values for data
-    trivia_iter = trivia.get("iter")
-    trivia_val = trivia.get("val")
-    squad_iter = squad.get("iter")
-    squad_val = squad.get("val")
-    
-    # Plot data on figure
-    ax.plot(trivia_iter, trivia_val, linestyle='-',
-            marker=trivia_marker, color=trivia_color, fillstyle='none', 
-            linewidth=linewidth, markerfacecolor = 'white',
-            clip_on=False)
-        
-    ax.plot(squad_iter, squad_val, linestyle='-',
-            marker=squad_marker, color=squad_color, fillstyle='none',
-            linewidth=linewidth, markerfacecolor = 'white',
-            clip_on=False)
     
     # Format x and y axes
     plt.xlabel(x_label)
@@ -70,10 +62,21 @@ def plot_learning(
     ax.spines['left'].set_position(('outward', offset))
     ax.spines['bottom'].set_position(('outward', offset))
     
-    # Add dataset labels
-    plt.text(trivia_iter[-1]+label_x_offset, trivia_val[-1]-label_y_offset,
-             model_name+" "+trivia_name, color=trivia_color)
-    plt.text(squad_iter[-1]+label_x_offset, squad_val[-1]-label_y_offset,
-             model_name+" "+squad_name, color=squad_color)
-    
+    # Iterate through keys
+    for key in data:
+        # Get data set
+        experiment = data.get(key)
+        
+        # Get x and y values for plotting
+        temp_iter = experiment.get(iter_key)
+        temp_val = experiment.get(val_key)
+        
+        # Plot data on figure
+        ax.plot(temp_iter, temp_val, linestyle='-', marker=markers.get(key),
+                color=colors.get(key), mec='w', ms=8, clip_on=False)
+        
+        # Add dataset labels
+        plt.text(temp_iter[-1]+label_x_offset, temp_val[-1]-label_y_offset,
+                 key+" "+score_type, color=colors.get(key))
+        
     return fig

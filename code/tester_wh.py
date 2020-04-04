@@ -9,14 +9,20 @@ from datetime import datetime as dt
 
 # ============================= Testing Analyze ==============================
 # Generate test data
-trivia = {"iter":np.arange(11),"val":np.arange(11)}
-squad = {"iter":np.arange(11),"val":0.5*np.arange(11)}
+btrivia = {"iter":np.arange(11),"val":np.arange(11)}
+bsquad = {"iter":np.arange(11),"val":0.5*np.arange(11)}
+mtrivia = {"iter":np.arange(11),"val":2*np.arange(11)}
+msquad = {"iter":np.arange(11),"val":1.5*np.arange(11)}
 
-print(trivia)
-print(squad)
+data = {
+        "BERT Trivia":btrivia,
+        "BERT SQuAD":bsquad,
+        "Meta-BERT Trivia":mtrivia,
+        "Meta-BERT SQuAD":msquad
+        }
 
 # Test plotting
-plot = analyze.plot_learning(trivia, squad, "Meta-BERT", iterations=10, max_score=10, x_tick_int=2, y_tick_int=1)
+plot = analyze.plot_learning(data, iterations=10, max_score=20, x_tick_int=2, y_tick_int=10)
 
 # Tryout displaying and saving plot
 #
@@ -27,11 +33,5 @@ plot = analyze.plot_learning(trivia, squad, "Meta-BERT", iterations=10, max_scor
 # %H = hour
 # %M = minute
 plot.show
-#plot.savefig("./results/test_fig_{}.png".format(dt.now().strftime("%Y%m%d_%H%M")))
+plot.savefig("./results/test_fig_{}.png".format(dt.now().strftime("%Y%m%d_%H%M")))
 # ============================= Testing Analyze ==============================
-
-
-a = np.array([])
-print(a)
-a = np.append(a,[1],axis=0)
-print(a)

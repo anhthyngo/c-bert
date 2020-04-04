@@ -41,6 +41,10 @@ args.add_argument('--seed', type=int, default=1111,
 args.add_argument('--model', type=str, default='BERT',
                     help='name of RLN network. default is BERT')
 
+# Set devise to CPU if available
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print("Device is {}".format(device))
+
 # create io object to import data
 
 # define models

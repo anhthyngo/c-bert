@@ -10,6 +10,8 @@ def c_learn(model, loss):
     """
     Method to run continual learning to Fine-Tune
     
+    Will most likely use methods implemented in utils
+    
     This is for the testing our experiment to get results on how well
     'model' can do continual learning.
     """

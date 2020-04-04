@@ -1,51 +1,128 @@
 """
 Module for general utility methods like generalized training loop, evaluation,
-fine-tuning, and getting data
+fine-tuning, and getting data.
+
+Mainly for continual learning.
 """
 
 import torch
+import tqdm
 import torch.nn as nn
 import torch.optim as opt
+import numpy as np
+from sklearn import metrics
 
-def train(model, data, loss, optimizer, device):
+def train(
+        model,          # model to train
+        train_loader,   # DataLoader with training data
+        loss,           # loss function object
+        optimizer,      # optimizer object
+        device,         # device to run training
+        ):
     """
-    Training loop
-    """
-    for i, batch in enumerate(data):
-        model.train() #puts in train mode
-        data, label = data[0], data[1]
+        Training loop
+    
+        Will look something like this.
         
-        #zero gradients
-        model.zero_grad()
+        NOT TESTED YET
+    """    
+    for i, (data, label) in enumerate(tqdm(train_loader)):        
+        # put model in train mode
+        model.train()
         
-        #send data through forward
+        # send data and labels to device
+        data, label = data.to(device), label.to(device)
+        
+        # zero gradients related to optimizer
+        optimizer.zero_grad()
+        
+        # send data through model forward
         out = model(data)
         
-        #calculate loss
+        # calculate loss
         l = loss(out, label)
         
-        #calculate gradients through back prop
+        # calculate gradients through back prop
         l.backward()
         
         #take a step in gradient descent
         optimizer.step()
     
-        #put something for annealing adjusting learning rate
+def evaluate(
+        model,        # model to train
+        data,         # validation data
+        label,        # validation labels
+        loss,         # loss function object
+        epoch,        # epoch number for tracking
+        device        # device to perform calculations
+        ):
+    """
+        Evaluation model on data. (May need to use dataloader as well)
+        
+        Returns: Loss, F1
+        
+        NOT TESTED YET
+    """
+    # puts model in evaluation mode
+    model.eval()
     
-def evaluate(model, data, loss):
-    """
-    Evaluation model on data
-    """
-    model.test() #puts in test mode
-    data, label = data[0], data[1]
-    out = model(data)
-    l = loss(out,label)
+    # don't need to track gradient
+    with torch.no_grad():
+        data, label = data.to(device), data.to(device)
+        out = model(data)
+        l = loss(out,label)
+        
+        # prepare out and label for F1 calculation
+        if device == 'cuda':
+            out, label = out.to('cpu'), label.to('cpu')
+        
+        f1 = metrics.f1_score(label,out)
     
-def fine_tune(model, train_data, val_data, loss, optimizer):
-    """
-    Fine-tune model on task with train and val data
-    """
+    return l, f1
     
-    for _ in epochs:
+def fine_tune(
+        model,            # model to be fine tuned
+        train_data,       # train dataloader
+        val_data,         # validation data
+        val_label,        # validation labels
+        loss,             # loss function object
+        optimizer,        # optimizer object
+        device,           # device to train and evaluate model
+        n_epochs,         # number of epochs to train
+        anneal_threshold, # buffer for when to anneal
+        anneal_r,         # rate to cut learning rate
+        verbose = True,   # flag whether to print checking
+        log_int = 10000   # number of epochs between printing logs
+        ):
+    """
+        Fine-tune model on task with train and val data
+        
+        NOT TESTED YET
+    """
+    losses =  np.array([])
+    best = 0
+    not_improved = 0
+    
+    for epoch in tqdm(range(n_epochs)):
         train(model, train_data, loss, optimizer, device)
-        evaluate(model, val_data, loss)
+        loss, f1 = evaluate(model, val_data, loss)
+        
+        # track validation
+        losses.append([loss])
+        
+        # keep track of best F1
+        if f1 >= best:
+            best = f1
+            not_improved = 0
+        else:
+            not_improved += 1
+            
+            # anneal learning rate if stops improving
+            if not_improved >= anneal_threshold:
+                optimizer.param_group['lr'] *= anneal_r
+                print('Annealed. LR is {:.2f}'.format(optimizer.param_group['lr']))
+        
+        # print results every interval
+        if epoch % log_int == 0 and verbose:
+            print('\nTest set: Best F1: {:.4f}, Average Loss: {:.4f}'.format(
+                    best, losses/epoch))

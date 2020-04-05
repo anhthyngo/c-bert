@@ -48,7 +48,7 @@ def plot_learning(
     ax = fig.add_subplot(111)
     
     # Plot Style
-    plt.style.use('fivethirtyeight')
+    plt.style.use('seaborn-deep')
     
     # Format x and y axes
     plt.xlabel(x_label)

@@ -47,6 +47,9 @@ def plot_learning(
     fig = plt.figure(figsize = (x_size, y_size), constrained_layout=True)
     ax = fig.add_subplot(111)
     
+    # Plot Style
+    plt.style.use('fivethirtyeight')
+    
     # Format x and y axes
     plt.xlabel(x_label)
     plt.xlim(0,iterations)
@@ -78,5 +81,11 @@ def plot_learning(
         # Add dataset labels
         plt.text(temp_iter[-1]+label_x_offset, temp_val[-1]-label_y_offset,
                  key+" "+score_type, color=colors.get(key))
+        
+        # Add title
+        plt.title("bert model scores")
+        
+        # Adjust layout
+        fig.tight_layout()
         
     return fig

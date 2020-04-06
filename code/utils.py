@@ -81,26 +81,35 @@ def evaluate(
     return l, f1
     
 def fine_tune(
-        model,            # model to be fine tuned
-        train_data,       # train dataloader
-        val_data,         # validation data
-        val_label,        # validation labels
-        loss,             # loss function object
-        optimizer,        # optimizer object
-        device,           # device to train and evaluate model
-        n_epochs,         # number of epochs to train
-        anneal_threshold, # buffer for when to anneal
-        anneal_r,         # rate to cut learning rate
-        verbose = True,   # flag whether to print checking
-        log_int = 10000   # number of epochs between printing logs
+        model,                 # model to be fine tuned
+        train_data,            # train dataloader
+        val_data,              # validation data
+        val_label,             # validation labels
+        loss,                  # loss function object
+        optimizer,             # optimizer object
+        device,                # device to train and evaluate model
+        n_epochs,              # number of epochs to train
+        anneal_threshold,      # buffer for when to anneal
+        anneal_r,              # rate to cut learning rate
+        save_path,             # directory storing saved model weights
+        model_name,            # name of model used
+        verbose = True,        # flag whether to print checking
+        log_int = 10000,       # number of epochs between printing logs
+        save_int = 10000,      # number of intervals to save parameters
+        check_best_int = 1000, # number of intervals for saving best parameters
+        best = False           # whether to record only best weights
         ):
     """
         Fine-tune model on task with train and val data
+        
+        Return: List of Saved Weight Paths
         
         NOT TESTED YET
     """
     losses =  np.array([])
     best = 0
+    rln_paths = []
+    best_path = save_path + r'\\' + model_name + r'_best.pt'
     not_improved = 0
     
     for epoch in tqdm(range(n_epochs)):
@@ -125,4 +134,21 @@ def fine_tune(
         # print results every interval
         if epoch % log_int == 0 and verbose:
             print('\nTest set: Best F1: {:.4f}, Average Loss: {:.4f}'.format(
-                    best, losses/epoch))
+                    best, np.sum(losses)/epoch))
+        
+        # save best weights
+        if epoch % check_best_int == 0 and f1 == best:
+            torch.save(model.representation, best_path)
+        
+        # save weights
+        if epoch % save_int == 0:
+            temp_path = save_path + r'\\' + model_name + r'.pt'
+            rln_paths.append(temp_path)
+            
+            if best:
+                best_model = torch.load(best_path)
+                torch.save(best_model, temp_path)
+            else:
+                torch.save(model.representation, temp_path)
+    
+    return rln_paths

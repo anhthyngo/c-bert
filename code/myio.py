@@ -154,14 +154,14 @@ class IO:
                 if testing:
                     
                     # for testing
-                    input_file = self.data_dir + r"\\" + use + r"\\" + task + r".jsonl"
+                    input_file = os.path.join(self.data_dir, use, task + r".jsonl")
                     with open(input_file, "r", encoding="utf-8-sig") as reader:
                         # skip header
                         content = reader.read().strip().split('\n')[1:]
                         input_data = [json.loads(line) for line in content]
                 else:
                     # for real data
-                    input_file = self.data_dir + r"\\" + use + r"\\" + task + r".jsonl.gz"
+                    input_file = os.path.join(self.data_dir, use, task + r".jsonl.gz")
                     with gzip.GzipFile(input_file, 'r') as reader:
                         # skip header
                         content = reader.read().decode('utf-8').strip().split('\n')[1:]

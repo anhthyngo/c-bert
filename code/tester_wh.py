@@ -46,7 +46,7 @@ if True:
     
     # set parameters for IO object
     wd = os.getcwd()
-    data_dir = wd + r'\\test_data'
+    data_dir = os.path.join(wd, r'test_data')
     task_names = ['tester']
     tokenizer = transformers.AutoTokenizer.from_pretrained('bert-base-uncased')
     max_length = 512

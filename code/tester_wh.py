@@ -48,7 +48,7 @@ if True:
     wd = os.getcwd()
     data_dir = wd + r'\\test_data'
     task_names = ['tester']
-    tokenizer = transformers.BertTokenizer.from_pretrained('bert-base-uncased')
+    tokenizer = transformers.AutoTokenizer.from_pretrained('bert-base-uncased')
     max_length = 512
     
     # read in 'tester' data in both train and dev directories

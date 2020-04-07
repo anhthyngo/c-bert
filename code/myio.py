@@ -140,7 +140,7 @@ class IO:
                 'dev'  : None  # dataloader for validation data
                 }
         
-        for task in self.task_names:
+        for task in self.task_names.keys():
             
             # for train and dev
             for use in temp_task.keys(): 
@@ -152,7 +152,7 @@ class IO:
                 # will remove later, but used for determing how to open file
                 # set `testing` to false if loading real data
                 if testing:
-                    
+                
                     # for testing
                     input_file = os.path.join(self.data_dir, use, task + r".jsonl")
                     with open(input_file, "r", encoding="utf-8-sig") as reader:
@@ -209,11 +209,12 @@ class IO:
                                     batch_size=self.batch_size,
                                     collate_fn=self.collate,
                                     shuffle=True)
+                # testing    
                 else:
                     dl = DataLoader(dataset=dataset,
                                     batch_size=self.batch_size,
                                     collate_fn=self.collate,
-                                    shuffle=True)
+                                    shuffle=False)
                 
                 # add to task
                 temp_task[use] = dl

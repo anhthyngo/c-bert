@@ -134,13 +134,18 @@ class IO:
         return [data_list, label_list]
                 
     
-    def read_task(self, testing):        
+    def read_task(self, testing):
+        """
+        Method to populate the `self.tasks` attribute of the class with
+        dictionaries per class storing data loaders for training and
+        validation datasets. Datasets are keyed by 'train' and 'dev', respectively
+        """        
         temp_task = {
                 'train': None, # dataloader for training data
                 'dev'  : None  # dataloader for validation data
                 }
         
-        for task in self.task_names.keys():
+        for task in tqdm(self.task_names.keys()):
             
             # for train and dev
             for use in temp_task.keys(): 

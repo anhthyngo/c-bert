@@ -3,15 +3,15 @@ Class for learning
 """
 
 import torch
-import tqdm
+#from tqdm import tqdm
 import torch.nn as nn
 import torch.optim as opt
-import numpy as np
 import sklearn
 import logging as log
 import math
 import os
-import pickle
+#import pickle
+#import numpy as np
 
 class Learner():
     def __init__(self,
@@ -254,7 +254,7 @@ class Learner():
             "flag_f1"   : 0
             }
         
-        for i, (data, label) in enumerate(tqdm(self.train_data)):        
+        for i, (data, label) in enumerate(self.train_data):        
             # put model in train mode
             self.model.train()
 
@@ -334,7 +334,7 @@ class Learner():
         
         # don't need to track gradient
         with torch.no_grad():
-            for i, (data, labels) in enumerate(tqdm(data_loader)):
+            for i, (data, labels) in enumerate(data_loader):
                 # send data and labels to device
                 data, labels = data.to(self.device), labels.to(self.device)
                 r_label = labels[:,0] # collate has rating labels 1st
@@ -393,7 +393,7 @@ class Learner():
         stop = False
         
         log.info('='*40 + ' Start Training ' + '='*40)
-        for epoch in tqdm(range(self.max_epochs)):
+        for epoch in range(self.max_epochs):
             train_results = self.train(epoch)
             val_results = self.evaluate(self.val_data, epoch=epoch)
             

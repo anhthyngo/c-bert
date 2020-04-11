@@ -10,7 +10,7 @@ from tqdm import tqdm, trange
 import gzip
 import json
 import pandas as pd
-#import logging
+import logging as log
 #logger = logging.getLogger(__name__)
 
 class QADataset(Dataset):
@@ -71,6 +71,9 @@ class IO:
                 }
 
 
+# =============================================================================
+# helper methods
+# =============================================================================
     def find_closest_indices(self, ans, obs, given_span_start):
         """
         Find answer span closest to given MRQA data. Returns single span
@@ -82,14 +85,15 @@ class IO:
         cont_len = len(obs)
         ans_len = len(ans)
         first = ans[0]
-        candidates = []
         current = obs.index(first)
+        candidates = [[current, current + ans_len]]
         min_diff = self.max_length
+        result = None
         
         # find all instances of span
         while current + ans_len < cont_len:
             if ans == obs[current: current + ans_len]:
-                candidates.append([current, current+ans_len])
+                candidates.append([current, current + ans_len])
             
             # if there are no more instances, break
             try:
@@ -103,6 +107,9 @@ class IO:
             if diff < min_diff:
                 min_diff = diff
                 result = candidate
+        
+        assert result != None, "Answer span not assigned for input {} and answer {}".format(self.tokenizer.decode(obs),
+                                                                                            self.tokenizer.decode(ans))
         
         return result
     
@@ -133,7 +140,9 @@ class IO:
         
         return [data_list, label_list]
                 
-    
+# =============================================================================
+# read data
+# =============================================================================
     def read_task(self, testing):
         """
         Method to populate the `self.tasks` attribute of the class with
@@ -145,7 +154,7 @@ class IO:
                 'dev'  : None  # dataloader for validation data
                 }
         
-        for task in tqdm(self.task_names.keys()):
+        for task in tqdm(self.task_names):
             
             # for train and dev
             for use in temp_task.keys(): 

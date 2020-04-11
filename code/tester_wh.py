@@ -8,8 +8,24 @@ import numpy as np
 from datetime import datetime as dt
 import os
 import json
+import logging as log
 import transformers
 import myio
+
+wd = os.getcwd()
+
+# for Spyder to get logging to work
+root = log.getLogger()
+while len(root.handlers):
+    root.removeHandler(root.handlers[0])
+
+# define logger. will produce logs in ./logs directory. make sure to clear
+log_fname = os.path.join(wd, "logs", "log_{}.log".format(
+    dt.now().strftime("%Y%m%d_%H%M")))
+log.basicConfig(filename=log_fname,
+    format='%(asctime)s - %(name)s - %(message)s',
+    level=log.INFO)
+root.addHandler(log.StreamHandler())
 
 # ============================= Testing Analyze ==============================
 # Generate test data
@@ -72,8 +88,10 @@ if True:
                 print(r'{} batch {} answer {} size is: {}'.format(use, i, j, a.size()))
                 print(r'{} batch {} answer {} is: {}'.format(use, i, j, a))
 
-            
-    
+# release logs from Python
+handlers = log.getLogger().handlers
+for handler in handlers:
+    handler.close()
             
             
             

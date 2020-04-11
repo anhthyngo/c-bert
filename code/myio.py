@@ -11,6 +11,7 @@ import json
 import pandas as pd
 import logging as log
 import transformers.data.processors.squad as sq
+import time
     
 class IO:
     """
@@ -38,18 +39,25 @@ class IO:
     data[7] |         [batch_size]         | is_impossible for v2       (NOT USED)
         
     """
-    def __init__(self,
-                 data_dir,         # name of the directory storing all tasks
-                 task_names,       # list of task directories, should match 'tasks' keys
-                 tokenizer,        # tokenizer to use
-                 max_seq_length, # maximum length of question
-                 doc_stride,       # length of sliding window for context
-                 max_query_length,   # maximum length of context sequence per window
-                 threads,          # number of threads per GPU
-                 batch_size=32,    # batch size for training
-                 shuffle=True      # whether to shuffle train sampling
+    def __init__(self, 
+                 task_names,              # list of task directories, should match 'tasks' keys
+                 tokenizer,               # tokenizer to use
+                 max_seq_length,          # maximum length of total sequence per window
+                 doc_stride,              # length of sliding window for context
+                 max_query_length,        # maximum length of question
+                 threads,                 # number of threads per GPU
+                 batch_size=32,           # batch size for training
+                 shuffle=True,            # whether to shuffle train sampling
+                 data_dir='data',         # name of the directory storing all tasks
+                 cache_dir='cached_data', # directory of cached data if it exists
+                 cache=True
                  ):
-        self.data_dir = data_dir
+        wd = os.getcwd()
+        self.data_dir = os.path.join(wd, data_dir)
+        self.cache_dir = os.path.join(wd, cache_dir)
+        
+        assert os.path.exists(self.data_dir) or os.path.exists(self.cache_dir), "No data"
+        
         self.task_names = task_names
         self.tokenizer = tokenizer
         self.max_seq_length = max_seq_length
@@ -59,6 +67,7 @@ class IO:
         self.threads = threads
         self.batch_size = batch_size
         self.shuffle = shuffle
+        self.cache = cache
         
         self.processor = sq.SquadV1Processor()
         self.tasks = {
@@ -80,6 +89,9 @@ class IO:
         per task. Dictionaries store DataLoaders for training and
         validation datasets.
         
+        Much of the code is based off the Huggingface example:
+        https://github.com/huggingface/transformers/blob/7972a4019f4bc9f85fd358f42249b90f9cd27c68/examples/run_squad.py
+        
         DataLoaders are keyed by 'train' and 'dev'.
         """        
         temp_task = {
@@ -90,27 +102,54 @@ class IO:
         for task in tqdm(self.task_names):
             data_dir = os.path.join(self.data_dir,task)
             
+            start = time.time()
             # for train and dev
             for use in temp_task.keys(): 
-                # get dataset from .json file with correct formatting
-                if use == 'train':
-                    training = True
-                    examples = self.processor.get_train_examples(data_dir)
-                elif use == 'dev':
-                    training = False
-                    examples = self.processor.get_dev_examples(data_dir)
                 
-                # convert data to squad objects
-                features, dataset = sq.squad_convert_examples_to_features(
-                    examples=examples,
-                    tokenizer=self.tokenizer,
-                    max_seq_length=self.max_seq_length,
-                    doc_stride=self.doc_stride,
-                    max_query_length=self.max_query_length,
-                    is_training= training,
-                    return_dataset = 'pt',
-                    threads = self.threads
-                )
+                # name cached file
+                cache_file = os.path.join(self.cache_dir,
+                                          "cached_{}_{}_{}.pt".format(
+                                              use,
+                                              task,
+                                              self.max_seq_length))
+                
+                if os.path.exists(cache_file):
+                    # load dataset from cached file
+                    
+                    log.info('Loading {} {} from cached file: {}'.format(
+                        task, use, cache_file))
+                    loaded = torch.load(cache_file)
+                    features, dataset, examples = (
+                        loaded['features'],
+                        loaded['dataset'],
+                        loaded['examples']
+                        )
+                else:
+                    # get dataset from .json file with correct formatting
+                    
+                    if use == 'train':
+                        training = True
+                        examples = self.processor.get_train_examples(data_dir)
+                    elif use == 'dev':
+                        training = False
+                        examples = self.processor.get_dev_examples(data_dir)
+                    
+                    # convert data to squad objects
+                    features, dataset = sq.squad_convert_examples_to_features(
+                        examples=examples,
+                        tokenizer=self.tokenizer,
+                        max_seq_length=self.max_seq_length,
+                        doc_stride=self.doc_stride,
+                        max_query_length=self.max_query_length,
+                        is_training= training,
+                        return_dataset = 'pt',
+                        threads = self.threads
+                    )
+                    
+                    # save cached
+                    if self.cache:
+                        log.info('Saving processed data into cached file: {}'.format(cache_file))
+                        torch.save({'features': features, 'dataset': dataset, 'examples': examples}, cache_file)
                 
                 # wrap dataset with DataLoader object
                 if use == 'train' and self.shuffle:
@@ -122,7 +161,9 @@ class IO:
                 
                 # add DataLoader to task
                 temp_task[use] = dl
-                
+            
+            log.info("Task {} took {:.6f}s".format(task, time.time()-start))
+            
             # add task to `self.tasks`
             self.tasks[task] = temp_task
     

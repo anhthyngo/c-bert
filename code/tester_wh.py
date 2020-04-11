@@ -61,7 +61,7 @@ if __name__ == '__main__':
     # ============================= Testing Data Loading ==============================
     
     if True:
-        data_dir = os.path.join(wd,'test_data')
+        data_dir = 'data'
         task_names = ['tester']
         tokenizer = transformers.AutoTokenizer.from_pretrained('bert-base-uncased') 
         max_seq_length = 384
@@ -70,26 +70,26 @@ if __name__ == '__main__':
         threads = 1
         
         # create IO object with batch size 2 for testing
-        data_handler = myio2.IO(data_dir,
-                                task_names,
+        data_handler = myio.IO(task_names,
                                 tokenizer,
                                 max_seq_length,
                                 doc_stride,
                                 max_query_length,
                                 threads,
-                                batch_size = 2)
+                                batch_size = 2,
+                                data_dir = data_dir)
         data_handler.read_tasks()
         dl_train = data_handler.tasks.get('tester').get('train')
         dl_dev = data_handler.tasks.get('tester').get('dev')
         
-        data_handler2 = myio2.IO(data_dir,
-                                 task_names,
+        data_handler2 = myio.IO(task_names,
                                  tokenizer,
                                  max_seq_length,
                                  doc_stride,
                                  max_query_length,
                                  threads,
-                                 batch_size = 2)        
+                                 batch_size = 2,
+                                 data_dir = data_dir)
         data_handler2.read_tasks()
         dl_train2 = data_handler2.tasks.get('tester').get('train')
         dl_dev2 = data_handler2.tasks.get('tester').get('dev')
@@ -97,12 +97,13 @@ if __name__ == '__main__':
         # print training example
         data = next(iter(dl_train))
         print("\n{} {}:\n {}".format('train', 1, tokenizer.decode(data[0][0,:])))
-        data = next(iter(dl_dev))
-        print("\n{} {}:\n {}".format('train', 2, tokenizer.decode(data[0][0,:])))
-        data = next(iter(dl_dev2))
-        print("\n{} {}:\n {}".format('dev', 1, tokenizer.decode(data[0][0,:])))
         data = next(iter(dl_train2))
+        print("\n{} {}:\n {}".format('train', 2, tokenizer.decode(data[0][0,:])))
+        data = next(iter(dl_dev))
+        print("\n{} {}:\n {}".format('dev', 1, tokenizer.decode(data[0][0,:])))
+        data = next(iter(dl_dev2))
         print("\n{} {}:\n {}".format('dev', 2, tokenizer.decode(data[0][0,:])))
+        
         
     # release logs from Python
     handlers = log.getLogger().handlers

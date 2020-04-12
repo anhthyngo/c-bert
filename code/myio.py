@@ -69,6 +69,8 @@ class IO:
         self.shuffle = shuffle
         self.cache = cache
         
+        # only working with V1 type data per MRQA
+        # https://www.cs.princeton.edu/~danqic/papers/mrqa2019.pdf
         self.processor = sq.SquadV1Processor()
         self.tasks = {
                 'SQuAD'                  : None,

@@ -79,8 +79,8 @@ if __name__ == '__main__':
                                 batch_size = 2,
                                 data_dir = data_dir)
         data_handler.read_tasks()
-        dl_train = data_handler.tasks.get('tester').get('train')
-        dl_dev = data_handler.tasks.get('tester').get('dev')
+        dl_train = data_handler.tasks.get('tester').get('train').get('data')
+        dl_dev = data_handler.tasks.get('tester').get('dev').get('data')
         
         data_handler2 = myio.IO(task_names,
                                  tokenizer,
@@ -91,19 +91,46 @@ if __name__ == '__main__':
                                  batch_size = 2,
                                  data_dir = data_dir)
         data_handler2.read_tasks()
-        dl_train2 = data_handler2.tasks.get('tester').get('train')
-        dl_dev2 = data_handler2.tasks.get('tester').get('dev')
+        dl_train2 = data_handler2.tasks.get('tester').get('train').get('data')
+        dl_dev2 = data_handler2.tasks.get('tester').get('dev').get('data')
         
         # print training example
+        print("\n{}".format(len(dl_train.dataset)))
         data = next(iter(dl_train))
         print("\n{} {}:\n {}".format('train', 1, tokenizer.decode(data[0][0,:])))
+        print("\n{} for {} {}:\n {}".format('start','train', 1, data[3][0]))
+        print("\n{} for {} {}:\n {}".format('end','train', 1, data[4][0]))
+        
+        print("\n{}".format(len(dl_train2.dataset)))
         data = next(iter(dl_train2))
         print("\n{} {}:\n {}".format('train', 2, tokenizer.decode(data[0][0,:])))
+        print("\n{} for {} {}:\n {}".format('start','train', 2, data[3][0]))
+        print("\n{} for {} {}:\n {}".format('end','train', 2, data[4][0]))
+        
+        print("\n{}".format(len(dl_dev.dataset)))
         data = next(iter(dl_dev))
         print("\n{} {}:\n {}".format('dev', 1, tokenizer.decode(data[0][0,:])))
+        print("\n{} for {} {}:\n {}".format('start','dev', 1, data[3][0]))
+        print("\n{} for {} {}:\n {}".format('end','dev', 1, data[4][0]))
+        
+        print("\n{}".format(len(dl_dev2.dataset)))
         data = next(iter(dl_dev2))
         print("\n{} {}:\n {}".format('dev', 2, tokenizer.decode(data[0][0,:])))
+        print("\n{} for {} {}:\n {}".format('start','dev', 2, data[3][0]))
+        print("\n{} for {} {}:\n {}".format('end','dev', 2, data[4][0]))
         
+        
+        features_dev2 = data_handler2.tasks.get('tester').get('dev').get('features')
+        examples_dev2 = data_handler2.tasks.get('tester').get('dev').get('examples')
+        
+        print('\n{}'.format(len(features_dev2)))
+        print('\n{}'.format(len(examples_dev2)))
+        
+        for feature in features_dev2:
+            print('\n{}'.format(type(feature)))
+            
+        for example in examples_dev2:
+            print('\n{}'.format(type(example)))
         
     # release logs from Python
     handlers = log.getLogger().handlers

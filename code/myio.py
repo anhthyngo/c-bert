@@ -18,8 +18,21 @@ class IO:
     Object to store:
         Import/Output Methods
     
-    All data are stored in dictionary 'tasks' as DataLoader objects keyed by
-    file name.
+    All data are stored in dictionary 'tasks'. Entries of 'tasks' are dictionaries
+    keyed by file name. Each dictionary contains a dictionary keyed by 'train'
+    and 'dev' for training and validation data, respectively. The entries for 
+    'train' and 'dev' are dictionaries that have entries:
+        
+    {'data'     : DataLoader of data with output described below
+     'features' : SquadFeatures
+     'examples' : SquadExample}
+    
+    SquadFeatures and SquadExample are used at evaluation time.
+    
+    Refer to squad.py below for more information about SquadFeatures and
+    SquadExample objects:
+    SquadFeatures : https://github.com/huggingface/transformers/blob/7972a4019f4bc9f85fd358f42249b90f9cd27c68/src/transformers/data/processors/squad.py#L640
+    SquadExample  : https://github.com/huggingface/transformers/blob/7972a4019f4bc9f85fd358f42249b90f9cd27c68/src/transformers/data/processors/squad.py#L577
     
     Dataloading uses Huggingface transformer's squad processor. All data should
     be formatted as original SQuAD v1.1 data from:
@@ -108,6 +121,12 @@ class IO:
             # for train and dev
             for use in temp_task.keys(): 
                 
+                data_dict = {
+                    'data'     : None,
+                    'features' : None,
+                    'examples' : None
+                    }
+                
                 # name cached file
                 cache_file = os.path.join(self.cache_dir,
                                           "cached_{}_{}_{}.pt".format(
@@ -161,8 +180,12 @@ class IO:
                 
                 dl = DataLoader(dataset, sampler=sampler, batch_size=self.batch_size)
                 
-                # add DataLoader to task
-                temp_task[use] = dl
+                # add data dictionary to task
+                data_dict['data'] = dl
+                data_dict['features'] = features
+                data_dict['examples'] = examples
+                
+                temp_task[use] = data_dict
             
             log.info("Task {} took {:.6f}s".format(task, time.time()-start))
             

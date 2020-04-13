@@ -8,8 +8,6 @@ import utils
 import myio
 
 
-
-
 class CLearner():
     def __init__(self,
                  model,                     # model to train
@@ -24,6 +22,10 @@ class CLearner():
         self.model = model
         self.train_data = train_data
         self.val_data = val_data
+        self.scores = {
+                    'TriviaQA-web' : {'iter' : [], 'f1': []},
+                    'SQuAD'   : {'iter' : [], 'f1': []}
+                 }
         #self.save_path = save_path
         
 # =============================================================================
@@ -52,16 +54,17 @@ class CLearner():
         
         NOT TESTED YET
         """
-        scores = {
-                    trivia_f1 : [],
-                    zero_f1   : []
-                 }
-     
+        
+        
+        best_squad_weights = None
+        
         for task in curriculum:
             
             ## this will save the weights for the model at every interval 
             ## probably 10k
-            paths = utils.fine_tune(model,
+            
+            # getting RLN weights
+            paths, f1 = utils.fine_tune(model,
                                     train_loader,
                                     val_loader,
                                     val_label,
@@ -74,130 +77,38 @@ class CLearner():
                                     save_path,
                                     model_name = task)
             
+            temp_iter = 1e4*np.arange(len(f1))
+            
             if task == 'TriviaQA-web':
                 ## we want weights for trivia
+                self.scores['TriviaQA-web']['f1'] = f1
+                self.scores['TriviaQA-web']['iter'] =temp_iter
+                
+                # loading RLN and classification for SQuAD
+                model.load_state_dict(torch.load(best_squad_weights))
                 for path in paths:
                     ## get vali scores
                     
-                    model.load_state_dict(torch.load(path))
+                    model.bert.load_state_dict(torch.load(path))
                     _,f1 = utils.evaluate(model,data = val_loader,device)
-    
-                    scores['trivia_f1'].append(f1)
-            else:
-                for path in paths:
-                    ## zero shot SQuAD validation
-                    cores['zero_f1'].append(zero_shot(model,path,val_loader))
                     
+                    self.scores['SQuAD']['f1'].append(f1)
+                
+                self.scores['SQuAD']['iter'] = temp_iter
+            else:
+                ## save squad weights
+                # saving classification layer + RLN weights
+                
+                # set best_squad_weights = os.path.join()
+                torch.save(model.state_dict(), best_squad_weights)
+            
         
         return scores
     
               
 
-            
-    def zero_shot(self,
-              model,                   # model to eval
-              path,                    # paths of weight
-              dataloader               # squad val loader
-              ):
-        '''
-        method to zero-shot SQuAD validation data with saved weights
-        
-        NOT TESTED YET
-        '''
-    
-    
-      
-        model.load_state_dict(torch.load(path))
-        _,f1 = utils.evaluate(model,data = dataloader,device)
-        
-        return f1
-            
-    
-    # def zero_shot(self,
-    #               model,                   # model to eval
-    #               w_paths                  # paths of weights
-    #               ):
-    #     '''
-    #     method to zero-shot SQuAD validation data with saved weights
-        
-    #     NOT TESTED YET
-    #     '''
-    #     ## create dictionary to store f1/iters
-    #     squad_f1 = {
-    #                 "iter"       : [],
-    #                 "f1_score"   : []
-    #                 }
-        
-    #     for path in w_paths:
-    #         model.load_state_dict(torch.load(path))
-    #         zero_shot_squad_f1 = utils.evaluate(model,data = val_loader,device)
-    #         squad_f1['iter'].append(iter_)
-    #         squad_f1['f1_score'].append(zero_shot_squad_f1)
-        
-    #     return squad_f1
-            
     
         
         
         
-def main():
-    import torch
-    import analyze
-    import numpy as np
-    from datetime import datetime as dt
-    import os
-    import json
-    import transformers
-    import myio
 
-    # set parameters for IO object
-    data_dir = 'data'
-    task_names = ['tester']
-    tokenizer = transformers.AutoTokenizer.from_pretrained('bert-base-uncased') 
-    max_seq_length = 384
-    doc_stride = 128
-    max_query_length = 64
-    threads = 1
-
-    # create IO object with batch size 2 for testing
-    data_handler = myio.IO(task_names,
-                                tokenizer,
-                                max_seq_length,
-                                doc_stride,
-                                max_query_length,
-                                threads,
-                                batch_size = 2,
-                                data_dir = data_dir)
-    data_handler.read_tasks()
-    dl_train = data_handler.tasks.get('tester').get('train')
-    dl_dev = data_handler.tasks.get('tester').get('dev')
-    
-    # print training example
-    data = next(iter(dl_train))
-    print("\n{} {}:\n {}".format('train', 1, tokenizer.decode(data[0][0,:])))
-
-    data = next(iter(dl_dev))
-    print("\n{} {}:\n {}".format('dev', 1, tokenizer.decode(data[0][0,:])))
-
- 
-if __name__ == '__main__':
-    main()
-
-
-      
-
-
-# def c_learn(model, loss):
-#     """
-#     Method to run continual learning to Fine-Tune
-    
-#     Will most likely use methods implemented in utils
-    
-#     This is for the testing our experiment to get results on how well
-#     'model' can do continual learning.
-#     """
-    
-#     #curriculum is an iterable for the task names (i.e. squad and triviaqa)
-#     for task in curriculum:
-#         data = io.tasks(task)
-#         utils.fine_tune(model, data)

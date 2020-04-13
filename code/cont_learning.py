@@ -1,114 +1,64 @@
 """
 Module to contain continual learning class
-NOTE: severely unfinished lol
 """
 
 import torch
-import utils
-import myio
+import numpy as np
 
-
-class CLearner():
+class ContLearner():
     def __init__(self,
-                 model,                     # model to train
-                 #device,                   # device to run on
-                 train_data,                # training dataloader
-                 val_data,                  # val dataloader
-                 #save_path                  # path to save best weights
+                 model,                                 # model to train
+                 model_name,                            # name of model
+                 learner,                               # device to run on
+                 curriculum = ['SQuAD', 'TriviaQA-web'] # curriculum for learning
                  ):
         """
         Class for continual learning
         """
         self.model = model
-        self.train_data = train_data
-        self.val_data = val_data
-        self.scores = {
-                    'TriviaQA-web' : {'iter' : [], 'f1': []},
-                    'SQuAD'   : {'iter' : [], 'f1': []}
-                 }
-        #self.save_path = save_path
+        self.model_name = model_name
+        self.learner = learner
+        self.curriculum = curriculum
+        self.scores = {}
         
-# =============================================================================
-#     Helper methods
-# =============================================================================
-   
+        for task in curriculum:
+            self.scores[task] = {
+                'iter' : None,
+                'f1'   : []
+                }
   
-    def c_learner(self,
-                  model,                   # mod
-                  train_loader,            # data loader for train
-                  val_loader,              # data loader for val
-                  #weight_paths,            # list of weight paths
-                  loss,
-                  save_path,
-                  curriculum = ['SQuAD','TriviaQA-web']
-                  ):
+    def c_learn(self):
         """
-        Method to run continual learning to Fine-Tune
-    
-        Will most likely use methods implemented in utils
+        Method to run continual learning on curriculum.
     
         This is for the testing our experiment to get results on how well
         'model' can do continual learning.
         
         Curriculum: Unsupervised -> SQuAD -> TriviaQA
-        
-        NOT TESTED YET
         """
-        
-        
         best_squad_weights = None
         
-        for task in curriculum:
+        for task in self.curriculum:
             
-            ## this will save the weights for the model at every interval 
-            ## probably 10k
+            # fine tune model on task
+            paths, f1, best_path = self.learner.fine_tune(task)
             
-            # getting RLN weights
-            paths, f1 = utils.fine_tune(model,
-                                    train_loader,
-                                    val_loader,
-                                    val_label,
-                                    loss,
-                                    optimizer,
-                                    device,
-                                    n_epochs,
-                                    anneal_threshold,
-                                    anneal_r,
-                                    save_path,
-                                    model_name = task)
-            
-            temp_iter = 1e4*np.arange(len(f1))
+            temp_iter = self.learner.log_int*np.arange(len(f1)+1) # every 10k
             
             if task == 'TriviaQA-web':
-                ## we want weights for trivia
+                # we want rln weights for trivia
                 self.scores['TriviaQA-web']['f1'] = f1
-                self.scores['TriviaQA-web']['iter'] =temp_iter
+                self.scores['TriviaQA-web']['iter'] = temp_iter
+                self.scores['SQuAD']['iter'] = temp_iter
                 
                 # loading RLN and classification for SQuAD
-                model.load_state_dict(torch.load(best_squad_weights))
+                self.model.load_state_dict(torch.load(best_squad_weights))
                 for path in paths:
-                    ## get vali scores
+                    # get validation scores through zero-shot replacing RLN weights
+                    self.model.bert.load_state_dict(torch.load(path))
+                    _ , zero_f1 = self.learner.evaluate(task, self.model, prefix = 'forget_SQuAD_{}'.format(self.model_name))
+                    self.scores['SQuAD']['f1'].append(zero_f1)
                     
-                    model.bert.load_state_dict(torch.load(path))
-                    _,f1 = utils.evaluate(model,data = val_loader,device)
-                    
-                    self.scores['SQuAD']['f1'].append(f1)
-                
-                self.scores['SQuAD']['iter'] = temp_iter
-            else:
-                ## save squad weights
-                # saving classification layer + RLN weights
-                
-                # set best_squad_weights = os.path.join()
-                torch.save(model.state_dict(), best_squad_weights)
-            
-        
-        return scores
-    
-              
-
-    
-        
-        
-        
-
+            elif task == 'SQuAD':
+                # store best SQuAD weights
+                best_squad_weights = best_path

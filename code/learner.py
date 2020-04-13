@@ -66,8 +66,8 @@ class Learner():
         self.log_dir = os.path.join(self.save_dir, 'logged')
         
         # make directory for recorded weights if doesn't already exist
-        if not os.path.exists(log_dir):
-            os.mkdir(log_dir)
+        if not os.path.exists(self.log_dir):
+            os.mkdir(self.log_dir)
         
         # for evaluation
         self.n_best = n_best
@@ -81,8 +81,8 @@ class Learner():
         self.optimizer = optimizer
         self.scheduler = scheduler
         
-        if optimizer == None:
-            assert scheduler == None, "Optimizer not defined, so scheduler should not be defined."
+        if optimizer is None:
+            assert scheduler is None, "Optimizer not defined, so scheduler should not be defined."
             
             # don't apply weight decay to bias and LayerNorm weights
             no_decay = ['bias', 'LayerNorm.weight']
@@ -99,7 +99,7 @@ class Learner():
             
             self.optimizer = opt.AdamW(optimizer_grouped_parameters, lr=lr, eps=eps)
             
-        if scheduler == None:
+        if scheduler is None:
             self.scheduler = transformers.optimization.get_linear_schedule_with_warmup(
                 self.optimizer, num_warmup_steps=warmup_steps, num_training_steps=max_steps
             )
@@ -165,7 +165,7 @@ class Learner():
         https://github.com/huggingface/transformers/blob/7972a4019f4bc9f85fd358f42249b90f9cd27c68/src/transformers/data/metrics/squad_metrics.py#L107
         """
         # assign model if None
-        if model == None:
+        if model is None:
             model = self.model
         
         # puts model in evaluation mode
@@ -246,12 +246,13 @@ class Learner():
         --------------------
         Return: 
         logged_rln_paths - list of best RLN weight paths
-        logged_f1   - list of best validation f1 scores
+        logged_f1        - list of best validation f1 scores
+        best_path        - path of best weights
         """
-        if model_name == None:
+        if model_name is None:
             model_name = self.model_name
             
-        if model == None:
+        if model is None:
             model = self.model
         
         cum_loss =  0.0
@@ -269,7 +270,7 @@ class Learner():
         best_model = copy.deepcopy(model)
         
         train_package = self.IO.get(task).get('train')
-        train_dataloader = self.get('data')
+        train_dataloader = train_package.get('data')
         
         # set number of epochs based on number of iterations
         max_epochs = self.max_steps // len(train_dataloader) + 1
@@ -278,7 +279,6 @@ class Learner():
         # train
         global_step = 0
         epochs_trained = 0
-        steps_trained_in_current_epoch = 0
         
         train_iterator = trange(epochs_trained, int(max_epochs), desc = 'Epoch')
         
@@ -304,7 +304,7 @@ class Learner():
                 
                 # write to log every verbose_int
                 if global_step % self.verbose_int == 0:
-                    log.info('Iteration {} of {} | Average Training Loss {:.6f} |'\
+                    log.info('\nIteration {} of {} | Average Training Loss {:.6f} |'\
                              ' Best Val F1 {} | Best Iteration {} |'.format(
                                  global_step,
                                  self.max_steps,
@@ -338,5 +338,25 @@ class Learner():
             if global_step > self.max_steps:
                 train_iterator.close()
                 break
+            
+            # final check for best if not already checked
+            if global_step % self.best_int != 0:
+                val_results = self.evaluate(task, prefix = '{}_current'.format(task))
+                current_f1 = val_results.get('f1')
+                    
+                if current_f1 > best_f1:
+                    best_f1 = current_f1
+                    best_iter = global_step
+                    torch.save(model.state_dict(), best_path)
+                    best_model.load_state_dict(torch.load(best_path))
+            
+            # log finished results
+            log.info('\nFinished | Average Training Loss {:.6f} |'\
+                     ' Best Val F1 {} | Best Iteration {} |'.format(
+                         cum_loss/global_step,
+                         best_f1,
+                         best_iter
+                    )
+                )
         
-        return rln_paths, best_f1s
+        return rln_paths, best_f1s, best_path

@@ -22,11 +22,17 @@ class ContLearner():
         self.scores = {}
         
         for task in curriculum:
-            self.scores[task] = {
+            self.scores['{} {}'.format(model_name,task)] = {
                 'iter' : None,
                 'f1'   : []
                 }
-  
+        
+        # do continual learning
+        self.c_learn()
+
+# =============================================================================
+# Methods to do continual learning
+# =============================================================================
     def c_learn(self):
         """
         Method to run continual learning on curriculum.
@@ -45,7 +51,11 @@ class ContLearner():
             
             temp_iter = self.learner.log_int*np.arange(len(f1)+1) # every 10k
             
-            if task == 'TriviaQA-web':
+            if task == 'SQuAD':
+                # store best SQuAD weights
+                best_squad_weights = best_path
+                
+            elif task == 'TriviaQA-web':
                 # we want rln weights for trivia
                 self.scores['TriviaQA-web']['f1'] = f1
                 self.scores['TriviaQA-web']['iter'] = temp_iter
@@ -59,6 +69,4 @@ class ContLearner():
                     _ , zero_f1 = self.learner.evaluate(task, self.model, prefix = 'forget_SQuAD_{}'.format(self.model_name))
                     self.scores['SQuAD']['f1'].append(zero_f1)
                     
-            elif task == 'SQuAD':
-                # store best SQuAD weights
-                best_squad_weights = best_path
+            

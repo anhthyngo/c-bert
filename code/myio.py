@@ -52,7 +52,9 @@ class IO:
     data[7] |         [batch_size]         | is_impossible for v2       (NOT USED)
         
     """
-    def __init__(self, 
+    def __init__(self,
+                 data_dir,                # name of the directory storing all tasks
+                 cache_dir,               # directory of cached data if it exists
                  task_names,              # list of task directories, should match 'tasks' keys
                  tokenizer,               # tokenizer to use
                  max_seq_length,          # maximum length of total sequence per window
@@ -61,13 +63,11 @@ class IO:
                  threads,                 # number of threads per GPU
                  batch_size=32,           # batch size for training
                  shuffle=True,            # whether to shuffle train sampling
-                 data_dir='data',         # name of the directory storing all tasks
-                 cache_dir='cached_data', # directory of cached data if it exists
                  cache=True
                  ):
-        wd = os.getcwd()
-        self.data_dir = os.path.join(wd, data_dir)
-        self.cache_dir = os.path.join(wd, cache_dir)
+
+        self.data_dir =  data_dir
+        self.cache_dir = cache_dir
         
         assert os.path.exists(self.data_dir) or os.path.exists(self.cache_dir), "No data"
         
@@ -114,7 +114,7 @@ class IO:
                 'dev'  : None  # dataloader for validation data
                 }
         
-        for task in tqdm(self.task_names):
+        for task in tqdm(self.task_names, desc='Task'):
             data_dir = os.path.join(self.data_dir,task)
             
             start = time.time()

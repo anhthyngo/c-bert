@@ -8,23 +8,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 colors = {
-        "BERT Trivia": "mediumseagreen",
-        "BERT SQuAD": "orange",
-        "Meta-BERT Trivia": "tab:blue",
-        "Meta-BERT SQuAD": "tab:pink"
+        "BERT Trivia-web"      : "mediumseagreen",
+        "BERT SQuAD"           : "orange",
+        "Meta-BERT Trivia-web" : "tab:blue",
+        "Meta-BERT SQuAD"      : "tab:pink"
         }
 
 markers = {
-        "BERT Trivia": "o",
-        "BERT SQuAD": "^",
-        "Meta-BERT Trivia": "P",
-        "Meta-BERT SQuAD": "X"
+        "BERT Trivia-web"       : "o",
+        "BERT SQuAD"            : "^",
+        "Meta-BERT Trivia-web"  : "P",
+        "Meta-BERT SQuAD"       : "X"
         }
 
 def plot_learning(
         data,                            # dictionary of dictionaries of data
         iter_key = "iter",               # iteration key word
-        val_key = "val",                 # validation key word
+        val_key = "f1",                  # validation key word
         score_type = "F1",               # score type for label name
         linewidth = 1.0,                 # linewidth for plot
         offset = 10,                     # pixel offset for axes
@@ -66,7 +66,7 @@ def plot_learning(
     ax.spines['bottom'].set_position(('outward', offset))
     
     # Iterate through keys
-    for key in data:
+    for key in data.keys():
         # Get data set
         experiment = data.get(key)
         
@@ -87,5 +87,5 @@ def plot_learning(
         
         # Adjust layout
         fig.tight_layout()
-        
+    
     return fig

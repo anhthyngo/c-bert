@@ -1,54 +1,124 @@
 """
 Main run script to execute experiments and analysis
+
+TO DO: Meta-Learning (OML)
 """
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as opt
-import transformers as hug
+import transformers
 import os
-from tqdm import tqdm, trange
-import argparse
 import logging as log
+from datetime import datetime as dt
+import random
+import numpy as np
 
 # =============== Self Defined ===============
-import io            # module for handling import/export of data
-import utils         # utility functions for training and and evaluating
-import model         # module to define model architecture
-import meta_learning # module for meta-learning (OML)
-import cont_learning # module for continual learning
-import analyze       # module for analyzing results
-import args          # module for parsing arguments for program
+import myio                        # module for handling import/export of data
+import learner                     # module for fine-tuning
+import model                       # module to define model architecture
+import meta_learning               # module for meta-learning (OML)
+import cont_learning               # module for continual learning
+import analyze                     # module for analyzing results
+from args import args, check_paths # module for parsing arguments for program
 
-parser = args.parser
+def main():
+    """
+    Main method for experiment
+    """
+    repository = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
+    parser = args.parse_args()
+    
+    # make sure paths exist
+    check_paths(parser)
+    
+    # format logging
+    log_name = os.path.join(parser.run_log, '{}_run_log_{}.log'.format(
+        parser.experiment,
+        dt.now().strftime("%Y%m%d_%H%M")
+        )
+    )
+    log.basicConfig(
+        log_name,
+        format='%(asctime)s | %(name)s -- %(message)s',
+        level=log.DEBUG
+    )
+    
+    # set devise to CPU if available
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    log.info("Device is {}".format(device))
+    
+    # set seed for replication
+    random.seed(parser.seed)
+    np.random.seed(parser.seed)
+    torch.manual_seed(parser.seed)
+    if device == "cuda":
+        torch.cuda.manual_seed_all(parser.seed)
+    
+    # set tokenizer and config from Huggingface
+    tokenizer = transformers.AutoTokenizer.from_pretrained(parser.model)
+    config = transformers.AutoConfig.from_pretrained(parser.model)
+    
+    # create IO object and import data
+    cache_dir = os.path.join(repository, 'cached_data')
+    if not os.path.exists(cache_dir):
+        os.mkdir(cache_dir)
+    
+    parser.tasks = parser.tasks.split(',')
+    
+    data_handler = myio.IO(parser.data_dir,
+                           cache_dir,
+                           parser.tasks,
+                           tokenizer,
+                           parser.max_seq_length,
+                           parser.doc_stride,
+                           parser.max_query_length,
+                           parser.threads,
+                           batch_size = parser.batch_size,
+                           shuffle=True,
+                           cache=True
+                           )
+    
+# =============================================================================
+# BASELINE
+# =============================================================================
+    # create BERT model
+    BERTmodel = model.QAModel(config)
+    
+    # create learner object for BERT model
+    trainer = learner.Learner(BERTmodel,
+                              'BERT',
+                              device,
+                              data_handler,
+                              parser.save_dir,
+                              parser.n_best_size,
+                              parser.max_answer_length,
+                              parser.do_lower_case,
+                              parser.verbose_logging,
+                              parser.version_2_with_negative,
+                              parser.null_score_diff_threshold,
+                              max_steps = parser.fine_tune_steps,
+                              log_int = parser.logging_steps,
+                              best_int = parser.save_steps,
+                              verbose_int = parser.verbose_steps,
+                              max_grad_norm = parser.max_grad_norm,
+                              optimizer = None,
+                              scheduler = None,
+                              weight_decay = parser.weight_decay,
+                              lr = parser.learning_rate,
+                              eps = parser.adam_epsilon,
+                              warmup_steps = parser.warmup_steps)
+    
+    # create continual learning object and perform continual learning
+    c_learner = cont_learning.ContLearner(BERTmodel,
+                                          'BERT',
+                                          trainer,
+                                          parser.curriculum)
+    
+    # generate BERT plot
+    plot = analyze.plot_learning(c_learner.scores)
+    plot.show
+    plot.savefig(os.path.join(os.getcwd(),"{}_{}.png".format('BERT',dt.now().strftime("%Y%m%d_%H%M"))))
 
-
-
-# Set devise to CPU if available
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print("Device is {}".format(device))
-
-# create io object to import data
-
-# define models
-
-# continual learning for baseline BERT
-
-# meta-learning to get Meta-BERT
-
-# continual learning for Meta-BERT
-
-# analyze results from continual learning steps
-
-# save results with io
-
-
-"""
-model = model.model(...)
-model_meta = model.model(...)
-optimizer = opt.Adam(model.parameters, arguments)
-optimizer_rln = opt.Adam(model_meta.representation.parameters, arguments)
-optimizer_pln = opt.Adam(model_meta.classification.parameters, arguments)
-loss = nn.NLLLoss(arguments)
-"""
+if __name__ == "__main__":
+    main()

@@ -94,9 +94,12 @@ class IO:
                 'NaturalQuestionsShort'  : None,
                 'tester'                 : None,
                 }
-                
+        
+        # read data
+        self.read_tasks()
+        
 # =============================================================================
-# read data
+# Methods to read data
 # =============================================================================
     def read_tasks(self):
         """

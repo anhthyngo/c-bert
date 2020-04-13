@@ -11,6 +11,7 @@ import logging as log
 from datetime import datetime as dt
 import random
 import numpy as np
+import sys
 
 # =============== Self Defined ===============
 import myio                        # module for handling import/export of data
@@ -119,6 +120,9 @@ def main():
     plot = analyze.plot_learning(c_learner.scores)
     plot.show
     plot.savefig(os.path.join(os.getcwd(),"{}_{}.png".format('BERT',dt.now().strftime("%Y%m%d_%H%M"))))
-
+    
+    # exit python
+    sys.exit(0)
+    
 if __name__ == "__main__":
     main()

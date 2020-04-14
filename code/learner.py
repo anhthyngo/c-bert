@@ -284,6 +284,7 @@ class Learner():
         train_iterator = trange(0, int(max_epochs), desc = 'Epoch')
         
         # log baseline zero-shot
+        log.info("Storing results for zero-shot on task: {}".format(task))
         zero_shot = self.evaluate(task, prefix = '{}_current'.format(task))
         log_rln_weights = os.path.join(task_log_dir, '{}.pt'.format(0))
         torch.save(self.model.model.bert.state_dict(), log_rln_weights)
@@ -301,6 +302,7 @@ class Learner():
                 
                 # check for best every best_int
                 if global_step % self.best_int == 0:
+                    log.info("Evaluating {} on step: {}".format(task, global_step))
                     val_results = self.evaluate(task, prefix = '{}_current'.format(task))
                     current_f1 = val_results.get('f1')
                     
@@ -324,6 +326,7 @@ class Learner():
                 
                 # save every log_int
                 if global_step % self.log_int == 0:
+                    log.info("Storing data for plotting on task {} step {}".format(task, global_step))
                     log_results = self.evaluate(task, best_model, prefix = '{}_log'.format(task))
                     log_f1 = log_results.get('f1')
                     
@@ -346,8 +349,9 @@ class Learner():
             if global_step > self.max_steps:
                 train_iterator.close()
                 break
-            
+        
         # final check for best if not already checked
+        log.info("Final check for training on: {}".format(task))
         if global_step % self.best_int != 0:
             val_results = self.evaluate(task, prefix = '{}_current'.format(task))
             current_f1 = val_results.get('f1')

@@ -68,7 +68,9 @@ class ContLearner():
                 
                 # loading RLN and classification for SQuAD
                 self.model.load_state_dict(torch.load(best_squad_weights))
-                for path in paths:
+                for i, path in enumerate(paths):
+                    log.info("Evaluating forgetting for iteration: {}".format(i))
+                    
                     # get validation scores through zero-shot replacing RLN weights
                     self.model.model.bert.load_state_dict(torch.load(path))
                     _ , zero_f1 = self.learner.evaluate(task, self.model, prefix = 'forget_SQuAD_{}'.format(self.hf_model_name))

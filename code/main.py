@@ -39,11 +39,9 @@ def main():
         dt.now().strftime("%Y%m%d_%H%M")
         )
     )
-    log.basicConfig(
-        log_name,
-        format='%(asctime)s | %(name)s -- %(message)s',
-        level=log.DEBUG
-    )
+    log.basicConfig(file_name=log_name,
+                    format='%(asctime)s | %(name)s -- %(message)s',
+                    level=log.DEBUG)
     
     # set devise to CPU if available
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

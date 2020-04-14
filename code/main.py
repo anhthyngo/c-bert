@@ -59,7 +59,7 @@ def main():
     config = transformers.AutoConfig.from_pretrained(parser.model)
     
     # create IO object and import data
-    cache_dir = os.path.join(parser.save_dir, 'cached_data')
+    cache_dir = os.path.join(parser.save_dir, 'cached_data', parser.model)
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
     

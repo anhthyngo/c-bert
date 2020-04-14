@@ -65,7 +65,7 @@ class IO:
                  shuffle=True,            # whether to shuffle train sampling
                  cache=True
                  ):
-
+        
         self.data_dir =  data_dir
         self.cache_dir = cache_dir
         
@@ -124,18 +124,18 @@ class IO:
             # for train and dev
             for use in temp_task.keys(): 
                 
-                data_dict = {
-                    'data'     : None,
-                    'features' : None,
-                    'examples' : None
-                    }
-                
                 # name cached file
                 cache_file = os.path.join(self.cache_dir,
                                           "cached_{}_{}_{}.pt".format(
                                               use,
                                               task,
                                               self.max_seq_length))
+                
+                data_dict = {
+                    'data'     : None,
+                    'features' : None,
+                    'examples' : None
+                    }
                 
                 if os.path.exists(cache_file):
                     # load dataset from cached file
@@ -172,7 +172,7 @@ class IO:
                     
                     # save cached
                     if self.cache:
-                        log.info('Saving processed data into cached file: {}'.format(cache_file))
+                        log.info('Saving {} processed data into cached file: {}'.format(len(dataset), cache_file))
                         torch.save({'features': features, 'dataset': dataset, 'examples': examples}, cache_file)
                 
                 # wrap dataset with DataLoader object

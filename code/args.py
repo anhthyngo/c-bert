@@ -25,7 +25,7 @@ args.add_argument('--seed',
                   help='random seed')
 args.add_argument('--run_log',
                   type=str,
-                  default=os.join.path(os.getcwd(),'log'),
+                  default=os.path.join(os.getcwd(),'log'),
                   help='where to print run log')
 args.add_argument('--tasks',
                   type=str,

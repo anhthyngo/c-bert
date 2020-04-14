@@ -62,9 +62,9 @@ class ContLearner():
                 
             elif task == 'TriviaQA-web':
                 # we want rln weights for trivia
-                self.scores['TriviaQA-web']['f1'] = f1
-                self.scores['TriviaQA-web']['iter'] = temp_iter
-                self.scores['SQuAD']['iter'] = temp_iter
+                self.scores['{} TriviaQA-web'.format(self.model_name)]['f1'] = f1
+                self.scores['{} TriviaQA-web'.format(self.model_name)]['iter'] = temp_iter
+                self.scores['{} SQuAD'.format(self.model_name)]['iter'] = temp_iter
                 
                 # loading RLN and classification for SQuAD
                 self.model.load_state_dict(torch.load(best_squad_weights))
@@ -74,6 +74,6 @@ class ContLearner():
                     # get validation scores through zero-shot replacing RLN weights
                     self.model.model.bert.load_state_dict(torch.load(path))
                     _ , zero_f1 = self.learner.evaluate(task, self.model, prefix = 'forget_SQuAD_{}'.format(self.hf_model_name))
-                    self.scores['SQuAD']['f1'].append(zero_f1)
+                    self.scores['{} SQuAD'.format(self.model_name)]['f1'].append(zero_f1)
                     
             

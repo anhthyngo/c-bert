@@ -347,24 +347,24 @@ class Learner():
                 train_iterator.close()
                 break
             
-            # final check for best if not already checked
-            if global_step % self.best_int != 0:
-                val_results = self.evaluate(task, prefix = '{}_current'.format(task))
-                current_f1 = val_results.get('f1')
+        # final check for best if not already checked
+        if global_step % self.best_int != 0:
+            val_results = self.evaluate(task, prefix = '{}_current'.format(task))
+            current_f1 = val_results.get('f1')
                     
-                if current_f1 > best_f1:
-                    best_f1 = current_f1
-                    best_iter = global_step
-                    torch.save(model.state_dict(), best_path)
-                    best_model.load_state_dict(torch.load(best_path))
+            if current_f1 > best_f1:
+                best_f1 = current_f1
+                best_iter = global_step
+                torch.save(model.state_dict(), best_path)
+                best_model.load_state_dict(torch.load(best_path))
             
-            # log finished results
-            log.info('\nFinished | Average Training Loss {:.6f} |'\
-                     ' Best Val F1 {} | Best Iteration {} |'.format(
-                         cum_loss/global_step,
-                         best_f1,
-                         best_iter
-                    )
+        # log finished results
+        log.info('\nFinished | Average Training Loss {:.6f} |'\
+                 ' Best Val F1 {} | Best Iteration {} |'.format(
+                     cum_loss/global_step,
+                     best_f1,
+                     best_iter
                 )
+            )
         
         return logged_rln_paths, logged_f1s, best_path

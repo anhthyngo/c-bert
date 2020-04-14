@@ -140,7 +140,7 @@ args.add_argument('--verbose_steps',
                   type=int,
                   default=1000,
                   help='Log results ever X update steps')
-args.add_argument('--verbose_log',
+args.add_argument('--verbose_logging',
                   action='store_true',
                   help='whether to store verbose logging in evaluation')
 args.add_argument("--null_score_diff_threshold",
@@ -153,6 +153,7 @@ args.add_argument("--do_lower_case",
 args.add_argument('--version_2_with_negative',
                   action='store_true',
                   help='whether negative examples exist like in SQuADv2')
+
 
 def check_args(parser):
     """

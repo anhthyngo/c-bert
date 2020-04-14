@@ -259,7 +259,7 @@ class Learner():
         best_iter = 0
         logged_rln_paths = []
         logged_f1s = []
-        model_log_dir = os.path.join(self.save_dir, model_name)
+        model_log_dir = os.path.join(self.log_dir, model_name)
         task_log_dir = os.path.join(model_log_dir, task)
         
         # make directory for model weights for given task if doesn't exist

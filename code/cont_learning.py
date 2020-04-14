@@ -6,7 +6,7 @@ import torch
 import numpy as np
 
 class ContLearner():
-    def __init__(self
+    def __init__(self,
                  model_name,                            # name of model
                  learner,                               # device to run on
                  curriculum = ['SQuAD', 'TriviaQA-web'] # curriculum for learning

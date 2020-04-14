@@ -33,7 +33,7 @@ class QAModel(nn.Module):
         config = transformers.AutoConfig.from_pretrained(rep_name)
         """
         
-        super(self).__init__()
+        super().__init__()
         self.num_labels = config.num_labels
 
         # Define model

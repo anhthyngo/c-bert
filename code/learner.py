@@ -9,7 +9,6 @@ https://github.com/huggingface/transformers/blob/7972a4019f4bc9f85fd358f42249b90
 """
 
 import torch
-import tqdm
 import torch.nn as nn
 import torch.optim as opt
 import numpy as np
@@ -184,7 +183,7 @@ class Learner():
         all_results = []
         
         # don't need to track gradient
-        for batch in tqdm(val_dataloader):
+        for i, batch in enumerate(val_dataloader):
             batch = tuple(t.to(self.device) for t in batch)
             
             with torch.no_grad():

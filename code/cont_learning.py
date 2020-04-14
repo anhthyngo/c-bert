@@ -5,6 +5,7 @@ Module to contain continual learning class
 import torch
 import numpy as np
 import copy
+import logging as log
 
 class ContLearner():
     def __init__(self,
@@ -29,6 +30,7 @@ class ContLearner():
                 }
         
         # do continual learning
+        log.info("Starting Continual Learning")
         self.c_learn()
 
 # =============================================================================
@@ -47,6 +49,7 @@ class ContLearner():
         
         for task in self.curriculum:
             
+            log.info("Fine-Tuning: {}".format(task))
             # fine tune model on task
             paths, f1, best_path = self.learner.fine_tune(task)
             

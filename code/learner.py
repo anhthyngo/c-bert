@@ -20,7 +20,7 @@ import os
 import copy
 from tqdm import tqdm, trange
 import logging as log
-import copy
+import time
 
 class Learner():
     def __init__(self,
@@ -282,7 +282,7 @@ class Learner():
         global_step = 1
         
         train_iterator = trange(0, int(max_epochs), desc = 'Epoch')
-        
+        start = time.time()
         # log baseline zero-shot
         log.info("Storing results for zero-shot on task: {}".format(task))
         zero_shot = self.evaluate(task, prefix = '{}_current'.format(task))
@@ -314,7 +314,7 @@ class Learner():
                 
                 # write to log every verbose_int
                 if global_step % self.verbose_int == 0:
-                    log.info('\nIteration {} of {} | Average Training Loss {:.6f} |'\
+                    log.info('Iteration {} of {} | Average Training Loss {:.6f} |'\
                              ' Best Val F1 {} | Best Iteration {} |'.format(
                                  global_step,
                                  self.max_steps,
@@ -365,11 +365,12 @@ class Learner():
 # =============================================================================
             
         # log finished results
-        log.info('\nFinished | Average Training Loss {:.6f} |'\
-                 ' Best Val F1 {} | Best Iteration {} |'.format(
+        log.info('Finished | Average Training Loss {:.6f} |'\
+                 ' Best Val F1 {} | Best Iteration {} | Time Completed {:.2f}s'.format(
                      cum_loss/global_step,
                      best_f1,
-                     best_iter
+                     best_iter,
+                     time.time()-start
                 )
             )
         

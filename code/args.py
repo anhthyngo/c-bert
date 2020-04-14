@@ -76,10 +76,6 @@ args.add_argument('--threads',
                   type=int,
                   default=1,
                   help='multiple threads for converting example to features')
-args.add_argument('--local_rank',
-                  type=int,
-                  default=-1,
-                  help='local_rank for distributed training on gpus')
 args.add_argument('--data_dir',
                   type=str,
                   default='data',

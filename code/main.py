@@ -83,7 +83,7 @@ def main():
     
     # create learner object for BERT model
     trainer = learner.Learner(BERTmodel,
-                              'BERT',
+                              parser.model,
                               device,
                               data_handler,
                               parser.save_dir,
@@ -107,7 +107,8 @@ def main():
     
     # create continual learning object and perform continual learning
     parser.continual_curriculum = parser.continual_curriculum.split(',')
-    c_learner = cont_learning.ContLearner('BERT',
+    c_learner = cont_learning.ContLearner(parser.model,
+                                          'BERT',
                                           trainer,
                                           curriculum = parser.continual_curriculum)
     

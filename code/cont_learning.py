@@ -9,6 +9,7 @@ import logging as log
 
 class ContLearner():
     def __init__(self,
+                 hf_model_name,                         # model name from hugging face
                  model_name,                            # name of model
                  learner,                               # device to run on
                  curriculum = ['SQuAD', 'TriviaQA-web'] # curriculum for learning
@@ -16,7 +17,7 @@ class ContLearner():
         """
         Class for continual learning
         """
-        
+        self.hf_model_name = hf_model_name
         self.model_name = model_name
         self.learner = learner
         self.model = copy.deepcopy(learner.model)
@@ -70,7 +71,7 @@ class ContLearner():
                 for path in paths:
                     # get validation scores through zero-shot replacing RLN weights
                     self.model.model.bert.load_state_dict(torch.load(path))
-                    _ , zero_f1 = self.learner.evaluate(task, self.model, prefix = 'forget_SQuAD_{}'.format(self.model_name))
+                    _ , zero_f1 = self.learner.evaluate(task, self.model, prefix = 'forget_SQuAD_{}'.format(self.hf_model_name))
                     self.scores['SQuAD']['f1'].append(zero_f1)
                     
             

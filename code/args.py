@@ -82,7 +82,7 @@ args.add_argument('--data_dir',
                   help='directory storing all data')
 args.add_argument('--batch_size', 
                   type=int, 
-                  default=32,
+                  default=8,
                   help='batch size')
 
 # =============================================================================

@@ -59,6 +59,8 @@ def main():
         device,
         parser.model))
     
+    print("{}".format(parser.experiment))
+    
     # set tokenizer and config from Huggingface
     tokenizer = transformers.AutoTokenizer.from_pretrained(parser.model)
     config = transformers.AutoConfig.from_pretrained(parser.model)

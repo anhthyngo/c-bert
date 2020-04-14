@@ -39,7 +39,7 @@ def main():
         dt.now().strftime("%Y%m%d_%H%M")
         )
     )
-    log.basicConfig(file_name=log_name,
+    log.basicConfig(filename=log_name,
                     format='%(asctime)s | %(name)s -- %(message)s',
                     level=log.DEBUG)
     
@@ -59,7 +59,7 @@ def main():
     config = transformers.AutoConfig.from_pretrained(parser.model)
     
     # create IO object and import data
-    cache_dir = os.path.join(repository, 'cached_data')
+    cache_dir = os.path.join(parser.save_dir, 'cached_data')
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
     
@@ -109,10 +109,10 @@ def main():
                               warmup_steps = parser.warmup_steps)
     
     # create continual learning object and perform continual learning
-    c_learner = cont_learning.ContLearner(BERTmodel,
-                                          'BERT',
+    parser.curriculum = parser.curriculum.split(',')
+    c_learner = cont_learning.ContLearner('BERT',
                                           trainer,
-                                          parser.curriculum)
+                                          curriculum = parser.curriculum)
     
     # generate BERT plot
     plot = analyze.plot_learning(c_learner.scores)

@@ -5,7 +5,7 @@ fine-tuning, and getting data.
 Mainly for continual learning.
 
 Code based off Huggingface's run_squad example
-https://github.com/huggingface/transformers/blob/7972a4019f4bc9f85fd358f42249b90f9cd27c68/examples/run_squad.py#L386
+https://github.com/huggingface/transformers/blob/7972a4019f4bc9f85fd358f42249b90f9cd27c68/examples/run_squad.py
 """
 
 import torch
@@ -128,7 +128,7 @@ class Learner():
             "end_positions"   : batch[4]
             }
             
-        # zero gradients related to optimizer
+        # zero gradients
         self.model.zero_grad()
             
         # send data through model forward
@@ -136,15 +136,18 @@ class Learner():
         # model outputs are always tuple in transformers (see doc)
         loss = out[0]
         
-        # clip gradients
-        nn.utils.clip_grad_norm_(self.model.parameters(), self.max_grad_norm)
-        
         # calculate gradients through back prop
         loss.backward()
+        
+        # clip gradients
+        nn.utils.clip_grad_norm_(self.model.parameters(), self.max_grad_norm)
             
         #take a step in gradient descent
         self.optimizer.step()
         self.scheduler.step()
+        
+        # zero gradients
+        self.model.zero_grad()
         
         return loss.detach()
         
@@ -172,7 +175,7 @@ class Learner():
         model.eval()
         
         # get dictionary of DataLoader, examples, features
-        package = self.IO.get(task).get('dev')
+        package = self.IO.tasks.get(task).get('dev')
         val_dataloader = package.get('data')
         examples = package.get('examples')
         features = package.get('features')
@@ -269,7 +272,7 @@ class Learner():
         best_path = os.path.join(self.save_dir, model_name + '_{}_best.pt'.format(task))
         best_model = copy.deepcopy(model)
         
-        train_package = self.IO.get(task).get('train')
+        train_package = self.IO.tasks.get(task).get('train')
         train_dataloader = train_package.get('data')
         
         # set number of epochs based on number of iterations
@@ -323,7 +326,7 @@ class Learner():
                     
                     # save weights
                     # only supports bert right now
-                    torch.save(model.bert.state_dict(), log_rln_weights)
+                    torch.save(best_model.bert.state_dict(), log_rln_weights)
                     
                     # record f1 and rln weights path
                     logged_rln_paths.append(log_rln_weights)
@@ -332,10 +335,10 @@ class Learner():
                 global_step += 1
                 
                 # break training if max steps reached (-1 to match Huggingface)
-                if global_step > self.max_steps:
+                if global_step > self.max_steps-1:
                     epoch_iterator.close()
                     break
-            if global_step > self.max_steps:
+            if global_step > self.max_steps-1:
                 train_iterator.close()
                 break
             
@@ -359,4 +362,4 @@ class Learner():
                     )
                 )
         
-        return rln_paths, best_f1s, best_path
+        return logged_rln_paths, logged_f1s, best_path

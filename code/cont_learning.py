@@ -6,8 +6,7 @@ import torch
 import numpy as np
 
 class ContLearner():
-    def __init__(self,
-                 model,                                 # model to train
+    def __init__(self
                  model_name,                            # name of model
                  learner,                               # device to run on
                  curriculum = ['SQuAD', 'TriviaQA-web'] # curriculum for learning
@@ -15,9 +14,10 @@ class ContLearner():
         """
         Class for continual learning
         """
-        self.model = model
+        
         self.model_name = model_name
         self.learner = learner
+        self.model = copy.deepcopy(learner.model)
         self.curriculum = curriculum
         self.scores = {}
         

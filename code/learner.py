@@ -53,7 +53,7 @@ class Learner():
         Data stored in myio.IO object called myio.
         """
         
-        self.model = model
+        self.model = model.to(device)
         self.model_name = model_name
         self.device = device
         self.IO = myio
@@ -170,8 +170,8 @@ class Learner():
         # assign model if None
         if model is None:
             model = self.model
-        
-        model.to(self.device)
+        else:
+            model.to(self.device)
         
         # puts model in evaluation mode
         model.eval()
@@ -273,10 +273,6 @@ class Learner():
         
         best_path = os.path.join(self.save_dir, model_name + '_{}_best.pt'.format(task))
         best_model = copy.deepcopy(model)
-        
-        # send models to device
-        model.to(self.device)
-        best_model.to(self.device)
         
         train_package = self.IO.tasks.get(task).get('train')
         train_dataloader = train_package.get('data')

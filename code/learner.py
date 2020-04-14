@@ -351,16 +351,18 @@ class Learner():
                 break
         
         # final check for best if not already checked
-        log.info("Final check for training on: {}".format(task))
-        if global_step % self.best_int != 0:
-            val_results = self.evaluate(task, prefix = '{}_current'.format(task))
-            current_f1 = val_results.get('f1')
-                    
-            if current_f1 > best_f1:
-                best_f1 = current_f1
-                best_iter = global_step
-                torch.save(self.model.state_dict(), best_path)
-                best_model.load_state_dict(torch.load(best_path))
+# =============================================================================
+#         log.info("Final check for training on: {}".format(task))
+#         if global_step % self.best_int != 0:
+#             val_results = self.evaluate(task, prefix = '{}_current'.format(task))
+#             current_f1 = val_results.get('f1')
+#                     
+#             if current_f1 > best_f1:
+#                 best_f1 = current_f1
+#                 best_iter = global_step
+#                 torch.save(self.model.state_dict(), best_path)
+#                 best_model.load_state_dict(torch.load(best_path))
+# =============================================================================
             
         # log finished results
         log.info('\nFinished | Average Training Loss {:.6f} |'\

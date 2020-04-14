@@ -63,11 +63,8 @@ def main():
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
     
-    parser.tasks = parser.tasks.split(',')
-    
     data_handler = myio.IO(parser.data_dir,
                            cache_dir,
-                           parser.tasks,
                            tokenizer,
                            parser.max_seq_length,
                            parser.doc_stride,
@@ -109,10 +106,10 @@ def main():
                               warmup_steps = parser.warmup_steps)
     
     # create continual learning object and perform continual learning
-    parser.curriculum = parser.curriculum.split(',')
+    parser.continual_curriculum = parser.continual_curriculum.split(',')
     c_learner = cont_learning.ContLearner('BERT',
                                           trainer,
-                                          curriculum = parser.curriculum)
+                                          curriculum = parser.continual_curriculum)
     
     # generate BERT plot
     plot = analyze.plot_learning(c_learner.scores)

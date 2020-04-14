@@ -27,10 +27,10 @@ args.add_argument('--run_log',
                   type=str,
                   default=os.path.join(os.getcwd(),'log'),
                   help='where to print run log')
-args.add_argument('--tasks',
+args.add_argument('--meta_tasks',
                   type=str,
-                  default='SQuAD,TriviaQA-web,NewsQA,SearchQA,HotpotQA,NaturalQuestionsShort',
-                  help='all the tasks for the experiment, separated by ,')
+                  default='NewsQA,SearchQA,HotpotQA,NaturalQuestionsShort',
+                  help='tasks for meta learning, separated by ,')
 args.add_argument('--continual_curriculum',
                   type=str,
                   default='SQuAD,TriviaQA-web',

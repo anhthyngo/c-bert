@@ -21,6 +21,7 @@ import os
 import copy
 from tqdm import tqdm, trange
 import logging as log
+import copy
 
 class Learner():
     def __init__(self,
@@ -176,11 +177,8 @@ class Learner():
         # puts model in evaluation mode
         model.eval()
         
-        # get dictionary of DataLoader, examples, features
-        package = self.IO.tasks.get(task).get('dev')
-        val_dataloader = package.get('data')
-        examples = package.get('examples')
-        features = package.get('features')
+        # get dictionary of DataLoader, examples, features        
+        val_dataloader, features, examples = self.IO.load_and_cache_task(task, 'dev')
         
         all_results = []
         
@@ -274,8 +272,8 @@ class Learner():
         best_path = os.path.join(self.save_dir, model_name + '_{}_best.pt'.format(task))
         best_model = copy.deepcopy(model)
         
-        train_package = self.IO.tasks.get(task).get('train')
-        train_dataloader = train_package.get('data')
+        # load data
+        train_dataloader,_,_ = self.IO.load_and_cache_task(task, 'train')
         
         # set number of epochs based on number of iterations
         max_epochs = self.max_steps // len(train_dataloader) + 1

@@ -73,7 +73,7 @@ class ContLearner():
                     
                     # get validation scores through zero-shot replacing RLN weights
                     self.model.model.bert.load_state_dict(torch.load(path))
-                    _ , zero_f1 = self.learner.evaluate(task, self.model, prefix = 'forget_SQuAD_{}'.format(self.hf_model_name))
-                    self.scores['{} SQuAD'.format(self.model_name)]['f1'].append(zero_f1)
+                    zero_results = self.learner.evaluate(task, self.model, prefix = 'forget_SQuAD_{}'.format(self.hf_model_name))
+                    self.scores['{} SQuAD'.format(self.model_name)]['f1'].append(zero_results.get('f1'))
                     
             

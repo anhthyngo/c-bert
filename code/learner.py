@@ -59,7 +59,7 @@ class Learner():
         self.device = device
         self.IO = myio
         self.save_dir = save_dir
-        self.max_steps = max_steps
+        self.max_steps = max_steps + 1 # +1 to record the 100,000th step
         self.log_int = log_int
         self.best_int = best_int
         self.verbose_int = verbose_int
@@ -118,6 +118,7 @@ class Learner():
         loss - average of start and end cross entropy loss
         https://huggingface.co/transformers/_modules/transformers/modeling_bert.html#BertForQuestionAnswering
         """
+        
         # unpack batch data
         batch = tuple(t.to(self.device) for t in batch)
         
@@ -240,8 +241,7 @@ class Learner():
         
     def fine_tune(self,
                   task,
-                  model_name = None,
-                  model = None
+                  model_name = None
                   ):
         """
         Fine-tune model on task
@@ -254,9 +254,6 @@ class Learner():
         """
         if model_name is None:
             model_name = self.model_name
-            
-        if model is None:
-            model = self.model
         
         cum_loss =  0.0
         best_f1 = 0
@@ -273,7 +270,7 @@ class Learner():
             os.mkdir(task_log_dir)
         
         best_path = os.path.join(self.save_dir, model_name + '_{}_best.pt'.format(task))
-        best_model = copy.deepcopy(model)
+        best_model = copy.deepcopy(self.model)
         
         # load data
         train_dataloader,_,_ = self.IO.load_and_cache_task(task, 'train')
@@ -283,17 +280,23 @@ class Learner():
         
 
         # train
-        global_step = 0
-        epochs_trained = 0
+        global_step = 1
         
-        train_iterator = trange(epochs_trained, int(max_epochs), desc = 'Epoch')
+        train_iterator = trange(0, int(max_epochs), desc = 'Epoch')
         
-        model.zero_grad()
+        # log baseline zero-shot
+        zero_shot = self.evaluate(task, prefix = '{}_current'.format(task))
+        log_rln_weights = os.path.join(task_log_dir, '{}.pt'.format(0))
+        torch.save(self.model.model.bert.state_dict(), log_rln_weights)
+        logged_rln_paths.append(log_rln_weights)
+        logged_f1s.append(zero_shot.get('f1'))
+        
+        self.model.zero_grad()
         for epoch in train_iterator:
             epoch_iterator = tqdm(train_dataloader, desc='Iteration')
             for step, batch in enumerate(epoch_iterator):
                 
-                model.train()
+                self.model.train()
                 iter_loss = self.train_step(batch, step)
                 cum_loss += iter_loss
                 
@@ -305,7 +308,7 @@ class Learner():
                     if current_f1 > best_f1:
                         best_f1 = current_f1
                         best_iter = global_step
-                        torch.save(model.state_dict(), best_path)
+                        torch.save(self.model.state_dict(), best_path)
                         best_model.load_state_dict(torch.load(best_path))
                 
                 # write to log every verbose_int
@@ -329,7 +332,7 @@ class Learner():
                     
                     # save weights
                     # only supports bert right now
-                    torch.save(best_model.bert.state_dict(), log_rln_weights)
+                    torch.save(best_model.model.bert.state_dict(), log_rln_weights)
                     
                     # record f1 and rln weights path
                     logged_rln_paths.append(log_rln_weights)
@@ -338,10 +341,10 @@ class Learner():
                 global_step += 1
                 
                 # break training if max steps reached (-1 to match Huggingface)
-                if global_step > self.max_steps-1:
+                if global_step > self.max_steps:
                     epoch_iterator.close()
                     break
-            if global_step > self.max_steps-1:
+            if global_step > self.max_steps:
                 train_iterator.close()
                 break
             

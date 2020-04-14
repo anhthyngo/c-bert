@@ -66,7 +66,7 @@ class ContLearner():
                 self.model.load_state_dict(torch.load(best_squad_weights))
                 for path in paths:
                     # get validation scores through zero-shot replacing RLN weights
-                    self.model.bert.load_state_dict(torch.load(path))
+                    self.model.model.bert.load_state_dict(torch.load(path))
                     _ , zero_f1 = self.learner.evaluate(task, self.model, prefix = 'forget_SQuAD_{}'.format(self.model_name))
                     self.scores['SQuAD']['f1'].append(zero_f1)
                     

@@ -117,7 +117,7 @@ args.add_argument('--max_grad_norm',
                   help='max gradient norm for clipping')
 args.add_argument('--warmup_steps',
                   type=int,
-                  dfault=0,
+                  default=0,
                   help='linear warmup over warmup steps')
 args.add_argument('--n_best_size',
                   type=int,

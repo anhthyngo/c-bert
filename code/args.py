@@ -158,10 +158,13 @@ args.add_argument('--version_2_with_negative',
                   action='store_true',
                   help='whether negative examples exist like in SQuADv2')
 
-def check_paths(parser):
+def check_args(parser):
     """
     make sure directories exist
     """
     assert os.path.exists(parser.data_dir), "Data directory does not exist"
     assert os.path.exists(parser.save_dir), "Save directory does not exist"
     assert os.path.exists(parser.run_log),  "Run logging directory does not exist"
+    
+    assert parser.version_2_with_negative == False, "Only supports version 1 without negatives"
+    assert (parser.do_lower_case and parser.model.find('uncased') != -1) or (not parser.do_lower_case and parser.model.find('uncased') == -1), "do_lower_case associated with uncased model"

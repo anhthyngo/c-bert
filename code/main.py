@@ -20,7 +20,7 @@ import model                       # module to define model architecture
 import meta_learning               # module for meta-learning (OML)
 import cont_learning               # module for continual learning
 import analyze                     # module for analyzing results
-from args import args, check_paths # module for parsing arguments for program
+from args import args, check_args  # module for parsing arguments for program
 
 def main():
     """
@@ -30,8 +30,8 @@ def main():
     
     parser = args.parse_args()
     
-    # make sure paths exist
-    check_paths(parser)
+    # run some checks on arguments
+    check_args(parser)
     
     # format logging
     log_name = os.path.join(parser.run_log, '{}_run_log_{}.log'.format(

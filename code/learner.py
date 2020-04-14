@@ -359,7 +359,7 @@ class Learner():
             if current_f1 > best_f1:
                 best_f1 = current_f1
                 best_iter = global_step
-                torch.save(model.state_dict(), best_path)
+                torch.save(self.model.state_dict(), best_path)
                 best_model.load_state_dict(torch.load(best_path))
             
         # log finished results

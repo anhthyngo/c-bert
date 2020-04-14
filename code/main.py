@@ -25,7 +25,7 @@ from args import args, check_args  # module for parsing arguments for program
 def main():
     """
     Main method for experiment
-    """
+    """    
     repository = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
     parser = args.parse_args()
@@ -53,6 +53,11 @@ def main():
     torch.manual_seed(parser.seed)
     if device == "cuda":
         torch.cuda.manual_seed_all(parser.seed)
+    
+    log.info("Starting experiment {} on {} with model {}".format(
+        parser.experiment,
+        device,
+        parser.model))
     
     # set tokenizer and config from Huggingface
     tokenizer = transformers.AutoTokenizer.from_pretrained(parser.model)

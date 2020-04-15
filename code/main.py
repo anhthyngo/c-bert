@@ -79,7 +79,6 @@ def main():
                            parser.max_seq_length,
                            parser.doc_stride,
                            parser.max_query_length,
-                           parser.threads,
                            batch_size = parser.batch_size,
                            shuffle=True,
                            cache=True

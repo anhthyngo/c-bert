@@ -62,7 +62,6 @@ class IO:
                  max_seq_length,          # maximum length of total sequence per window
                  doc_stride,              # length of sliding window for context
                  max_query_length,        # maximum length of question
-                 threads,                 # number of threads per GPU
                  batch_size=32,           # batch size for training
                  shuffle=True,            # whether to shuffle train sampling
                  cache=True
@@ -76,7 +75,6 @@ class IO:
         self.max_seq_length = max_seq_length
         self.doc_stride = doc_stride
         self.max_query_length = max_query_length
-        self.threads = threads
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.cache = cache
@@ -151,8 +149,7 @@ class IO:
                 doc_stride=self.doc_stride,
                 max_query_length=self.max_query_length,
                 is_training= training,
-                return_dataset = 'pt',
-                threads = self.threads
+                return_dataset = 'pt'
                 )
                     
             # save cached

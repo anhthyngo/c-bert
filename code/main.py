@@ -87,7 +87,7 @@ def main():
 # =============================================================================
     # create BERT model
     BERTmodel = model.QAModel(config)
-    BERTmodel = transformers.AutoModelForQuestionAnswering.from_config(config)
+    BERTmodel = nn.Linear(1,1)
     
     # create learner object for BERT model
     trainer = learner.Learner(parser.fp16,

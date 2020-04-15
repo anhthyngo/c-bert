@@ -133,7 +133,7 @@ def main():
     log.info("Total time is: {:.0f}min".format((time.time()-start)/60))
     
     # exit python
-    sys.exit(0)
+    #sys.exit(0)
     
 if __name__ == "__main__":
     main()

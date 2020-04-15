@@ -313,7 +313,14 @@ class Learner():
         log.info("Storing results for zero-shot on task: {}".format(task))
         zero_shot = self.evaluate(task, prefix = '{}_current'.format(task))
         log_rln_weights = os.path.join(task_log_dir, '{}.pt'.format(0))
-        torch.save(self.model.model.bert.state_dict(), log_rln_weights)
+        
+        # for mulit-gpu
+        if isinstance(self.model, nn.DataParallel):
+            rln_state_dict = self.model.module.model.bert.state_dict()
+        else:
+            rln_state_dict = self.model.model.bert.state_dict()
+        
+        torch.save(rln_state_dict, log_rln_weights)
         logged_rln_paths.append(log_rln_weights)
         logged_f1s.append(zero_shot.get('f1'))
         
@@ -335,8 +342,20 @@ class Learner():
                     if current_f1 > best_f1:
                         best_f1 = current_f1
                         best_iter = global_step
-                        torch.save(self.model.state_dict(), best_path)
-                        best_model.load_state_dict(torch.load(best_path))
+                        
+                        # for multi-gpu
+                        if isinstance(self.model, nn.DataParallel):
+                            best_state_dict = self.model.module.state_dict()
+                        else:
+                            best_state_dict = self.model.state_dict()
+                        
+                        torch.save(best_state_dict, best_path)
+                        
+                        # for multi-gpu
+                        if isinstance(best_model, nn.DataParallel):
+                            best_model.module.load_state_dict(torch.load(best_path))
+                        else:
+                            best_model.load_state_dict(torch.load(best_path))
                 
                 # write to log every verbose_int
                 if global_step % self.verbose_int == 0:
@@ -360,7 +379,14 @@ class Learner():
                     
                     # save weights
                     # only supports bert right now
-                    torch.save(best_model.model.bert.state_dict(), log_rln_weights)
+                    
+                    # for mulit-gpu
+                    if isinstance(best_model, nn.DataParallel):
+                        rln_state_dict = best_model.module.model.model.bert.state_dict()
+                    else:
+                        rln_state_dict = best_model.model.bert.state_dict()
+                    
+                    torch.save(rln_state_dict, log_rln_weights)
                     
                     # record f1 and rln weights path
                     logged_rln_paths.append(log_rln_weights)
@@ -386,8 +412,19 @@ class Learner():
 #             if current_f1 > best_f1:
 #                 best_f1 = current_f1
 #                 best_iter = global_step
-#                 torch.save(self.model.state_dict(), best_path)
-#                 best_model.load_state_dict(torch.load(best_path))
+#                 # for multi-gpu
+#                 if isinstance(self.model, nn.DataParallel):
+#                     best_state_dict = self.model.module.state_dict()
+#                 else:
+#                     best_state_dict = self.model.state_dict()
+#                 
+#                 torch.save(best_state_dict, best_path)
+#                     
+#                 # for multi-gpu
+#                 if isinstance(best_model, nn.DataParallel):
+#                     best_model.module.load_state_dict(torch.load(best_path))
+#                 else:
+#                     best_model.load_state_dict(torch.load(best_path))
 # =============================================================================
             
         # log finished results

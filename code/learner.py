@@ -24,6 +24,8 @@ import time
 
 class Learner():
     def __init__(self,
+                 fp16,
+                 fp16_opt_level,
                  model,
                  model_name,
                  device,
@@ -52,6 +54,8 @@ class Learner():
         
         Data stored in myio.IO object called myio.
         """
+        self.fp16 = fp16
+        self.fp16_opt_level = fp16_opt_level
         
         self.model = model.to(device)
         self.model_name = model_name
@@ -104,6 +108,11 @@ class Learner():
                 self.optimizer, num_warmup_steps=warmup_steps, num_training_steps=max_steps
             )
         
+        if self.fp16:
+            from apex import amp
+            amp.register_half_function(torch, "einsum")
+            self.model, self.optimizer = amp.initialize(model, optimizer, opt_level=self.fp16_opt_level)
+        
         
     def train_step(self,
                    batch,
@@ -117,6 +126,8 @@ class Learner():
         loss - average of start and end cross entropy loss
         https://huggingface.co/transformers/_modules/transformers/modeling_bert.html#BertForQuestionAnswering
         """
+        if self.fp16:
+            from apex import amp
         
         # unpack batch data
         batch = tuple(t.to(self.device) for t in batch)
@@ -138,10 +149,17 @@ class Learner():
         loss = out[0]
         
         # calculate gradients through back prop
-        loss.backward()
+        if self.fp16:
+            with amp.scale_loss(loss, self.optimizer) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            loss.backward()
         
         # clip gradients
-        nn.utils.clip_grad_norm_(self.model.parameters(), self.max_grad_norm)
+        if self.fp16:
+            nn.utils.clip_grad_norm_(amp.master_params(optimizer), self.max_grad_norm)
+        else:
+            nn.utils.clip_grad_norm_(self.model.parameters(), self.max_grad_norm)
             
         #take a step in gradient descent
         self.optimizer.step()

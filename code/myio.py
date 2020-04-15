@@ -1,5 +1,8 @@
 """
-Module with class io containing methods for importing and exporting data
+Module with class io containing methods for importing and exporting data.
+
+Based on run_squad example:
+https://github.com/huggingface/transformers/blob/7972a4019f4bc9f85fd358f42249b90f9cd27c68/examples/run_squad.py
 """
 
 import os

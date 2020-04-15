@@ -89,7 +89,9 @@ def main():
     BERTmodel = model.QAModel(config)
     
     # create learner object for BERT model
-    trainer = learner.Learner(BERTmodel,
+    trainer = learner.Learner(parser.fp16,
+                              parser.fp16_opt_level,
+                              BERTmodel,
                               parser.model,
                               device,
                               data_handler,
@@ -123,7 +125,7 @@ def main():
     # generate BERT plot
     plot = analyze.plot_learning(c_learner.scores)
     plot.show
-    plot_name = os.path.join(os.getcwd(),"{}_{}_{}.png".format(self.experiment, self.model, dt.now().strftime("%Y%m%d_%H%M")))
+    plot_name = os.path.join(os.getcwd(),"{}_{}_{}.png".format(parser.experiment, parser.model, dt.now().strftime("%Y%m%d_%H%M")))
     plot.savefig(plot_name)
     log.info("Plot saved at: {}".format(plot_name))
     

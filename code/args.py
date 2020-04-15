@@ -88,9 +88,6 @@ args.add_argument('--batch_size',
 # =============================================================================
 # for training
 # =============================================================================
-args.add_argument('--fp16',
-                  action='store_true',
-                  help='whether to use 16-bit precision (through NVIDIA apex)')
 args.add_argument('--meta_steps',
                   type=int,
                   default=100,
@@ -154,6 +151,17 @@ args.add_argument('--version_2_with_negative',
                   action='store_true',
                   help='whether negative examples exist like in SQuADv2')
 
+# =============================================================================
+# mixed point precision
+# =============================================================================
+args.add_argument('--fp16',
+                  action='store_true',
+                  help='whether to use 16-bit precision (through NVIDIA apex)')
+args.add_argument("--fp16_opt_level",
+                  type=str,
+                  default="O1",
+                  help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
+                  "See details at https://nvidia.github.io/apex/amp.html")
 
 def check_args(parser):
     """
@@ -165,3 +173,11 @@ def check_args(parser):
     
     assert parser.version_2_with_negative == False, "Only supports version 1 without negatives"
     assert (parser.do_lower_case and parser.model.find('uncased') != -1) or (not parser.do_lower_case and parser.model.find('uncased') == -1), "do_lower_case associated with uncased model"
+    
+    assert (parser.batch_size > 16 and parser.fp16) or parser.batch_size <= 16, "Need mixed point precision for batch size greater than 16"
+    
+    if parser.fp16:
+        try:
+            from apex import amp
+        except ImportError:
+            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")

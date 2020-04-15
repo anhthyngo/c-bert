@@ -157,7 +157,7 @@ class Learner():
         
         # clip gradients
         if self.fp16:
-            nn.utils.clip_grad_norm_(amp.master_params(optimizer), self.max_grad_norm)
+            nn.utils.clip_grad_norm_(amp.master_params(self.optimizer), self.max_grad_norm)
         else:
             nn.utils.clip_grad_norm_(self.model.parameters(), self.max_grad_norm)
             

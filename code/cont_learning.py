@@ -46,34 +46,36 @@ class ContLearner():
         
         Curriculum: Unsupervised -> SQuAD -> TriviaQA
         """
-        best_squad_weights = None
+        best_prev_weights = []
+        prev_tasks = []
         
-        for task in self.curriculum:
-            
+        for i, task in enumerate(self.curriculum):               
             log.info("Fine-Tuning: {}".format(task))
             # fine tune model on task
             paths, f1, best_path = self.learner.fine_tune(task)
             
-            temp_iter = self.learner.log_int*np.arange(len(f1)+1) # every 10k
+            temp_iter = self.learner.log_int*np.arange(len(f1)) # every 10k
             
-            if task == 'SQuAD':
-                # store best SQuAD weights
-                best_squad_weights = best_path
-                
-            elif task == 'TriviaQA-web':
+            if i == len(self.curriculum) - 1:
                 # we want rln weights for trivia
-                self.scores['{} TriviaQA-web'.format(self.model_name)]['f1'] = f1
-                self.scores['{} TriviaQA-web'.format(self.model_name)]['iter'] = temp_iter
-                self.scores['{} SQuAD'.format(self.model_name)]['iter'] = temp_iter
+                self.scores['{} {}'.format(self.model_name, task)]['f1'] = f1
+                self.scores['{} {}'.format(self.model_name, task)]['iter'] = temp_iter
                 
-                # loading RLN and classification for SQuAD
-                self.model.load_state_dict(torch.load(best_squad_weights))
-                for i, path in enumerate(paths):
-                    log.info("Evaluating forgetting for iteration: {}".format(i))
-                    
-                    # get validation scores through zero-shot replacing RLN weights
-                    self.model.model.bert.load_state_dict(torch.load(path))
-                    zero_results = self.learner.evaluate(task, self.model, prefix = 'forget_SQuAD_{}'.format(self.hf_model_name))
-                    self.scores['{} SQuAD'.format(self.model_name)]['f1'].append(zero_results.get('f1'))
-                    
+                
+                # loading best models for previous tasks
+                for j, prev_task in enumerate(prev_tasks):
+                    self.model.load_state_dict(torch.load(best_prev_weights[j]))
+                    for k, path in enumerate(paths):
+                        log.info("Evaluating forgetting for {} on iteration: {}".format(prev_task, k))
+                        
+                        # get validation scores through zero-shot replacing RLN weights
+                        self.model.model.bert.load_state_dict(torch.load(path))
+                        zero_results = self.learner.evaluate(prev_task, self.model, prefix = 'forget_{}_{}'.format(prev_task, self.hf_model_name))
+                        self.scores['{} {}'.format(self.model_name, prev_task)]['f1'].append(zero_results.get('f1'))
+                        
+                        self.scores['{} {}'.format(self.model_name, prev_task)]['iter'] = temp_iter
+            else:
+                # store best SQuAD weights
+                best_prev_weights.append(best_path)
+                prev_tasks.append(task)
             

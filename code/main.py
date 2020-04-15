@@ -13,6 +13,7 @@ import random
 import numpy as np
 import sys
 import time
+import json
 
 # =============== Self Defined ===============
 import myio                        # module for handling import/export of data
@@ -125,14 +126,20 @@ def main():
     
     log.info("Generating Plot")
     # generate BERT plot
+    now = dt.now().strftime("%Y%m%d_%H%M")
+    
     plot = analyze.plot_learning(c_learner.scores)
-    plot_name = os.path.join(os.getcwd(),"{}_{}_{}.png".format(parser.experiment, parser.model, dt.now().strftime("%Y%m%d_%H%M")))
+    plot_name = os.path.join(os.getcwd(),"{}_{}_{}.png".format(parser.experiment, parser.model, now))
     plot.savefig(plot_name)
     log.info("Plot saved at: {}".format(plot_name))
-    log.info("Total time is: {:.0f}min".format((time.time()-start)/60))
     
-    # exit python
-    #sys.exit(0)
+    # write data to json
+    baseline_results_name = os.path.join(os.getcwd(), "{}_{}_{}.json".format(parser.experiment, parser.model, now))
+    with open(baseline_results_name, 'w') as fw:
+        json.dump(c_learner.scores, fw)
+    log.info("Baseline results written to: {}".format(baseline_results_name))
+    
+    log.info("Total time is: {:.0f}min".format((time.time()-start)/60))
     
 if __name__ == "__main__":
     main()

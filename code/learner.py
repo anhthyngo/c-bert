@@ -311,7 +311,7 @@ class Learner():
         # train
         global_step = 1
         
-        train_iterator = trange(0, int(max_epochs), desc = 'Epoch')
+        train_iterator = trange(0, int(max_epochs), desc = 'Epoch', mininterval=30)
         start = time.time()
         # log baseline zero-shot
         log.info("Storing results for zero-shot on task: {}".format(task))
@@ -330,7 +330,7 @@ class Learner():
         
         self.model.zero_grad()
         for epoch in train_iterator:
-            epoch_iterator = tqdm(train_dataloader, desc='Iteration', mininterval=5)
+            epoch_iterator = tqdm(train_dataloader, desc='Epoch Iteration', mininterval=30)
             for step, batch in enumerate(epoch_iterator):
                 
                 self.model.train()

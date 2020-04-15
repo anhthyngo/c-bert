@@ -44,11 +44,13 @@ def plot_learning(
     """
     
     # Create plot figure
-    fig = plt.figure(figsize = (x_size, y_size), constrained_layout=True)
+    fig = plt.figure(figsize = (x_size, y_size))
     ax = fig.add_subplot(111)
     
     # Plot Style
-    plt.style.use('seaborn-deep')
+# =============================================================================
+#     plt.style.use('seaborn-deep')
+# =============================================================================
     
     # Format x and y axes
     plt.xlabel(x_label)
@@ -67,6 +69,9 @@ def plot_learning(
     
     # Iterate through keys
     for key in data.keys():
+        
+        assert key in colors.keys(), "{} is not a support key in: {}".format(key, colors.keys())
+        
         # Get data set
         experiment = data.get(key)
         

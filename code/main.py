@@ -12,6 +12,7 @@ from datetime import datetime as dt
 import random
 import numpy as np
 import sys
+import time
 
 # =============== Self Defined ===============
 import myio                        # module for handling import/export of data
@@ -26,6 +27,7 @@ def main():
     """
     Main method for experiment
     """    
+    start = time.time()
     repository = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
     parser = args.parse_args()
@@ -128,6 +130,7 @@ def main():
     plot_name = os.path.join(os.getcwd(),"{}_{}_{}.png".format(parser.experiment, parser.model, dt.now().strftime("%Y%m%d_%H%M")))
     plot.savefig(plot_name)
     log.info("Plot saved at: {}".format(plot_name))
+    log.info("Total time is: {:.0f}min".format((time.time()-start)/60))
     
     # exit python
     sys.exit(0)

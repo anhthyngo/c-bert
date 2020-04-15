@@ -98,7 +98,7 @@ args.add_argument('--fine_tune_steps',
                   help='number of updates for fine-tuning')
 args.add_argument('--learning_rate', 
                   type=float, 
-                  default=5e-3,
+                  default=5e-5,
                   help='initial learning rate for Adam')
 args.add_argument("--weight_decay",
                   type=float,

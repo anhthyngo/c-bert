@@ -339,11 +339,11 @@ class Learner():
                 
                 # check for best every best_int
                 if global_step % self.best_int == 0:
-                    log.info("="*40+"Evaluating {} on step: {}".format(task, global_step))
+                    log.info("="*40+" Evaluating {} on step: {}".format(task, global_step))
                     val_results = self.evaluate(task, prefix = '{}_current'.format(task))
                     current_f1 = val_results.get('f1')
                     
-                    log.info("="*40+"Current Score {}, Step = {} | Previous Best Score {}, Step = {}".format(
+                    log.info("="*40+" Current Score {}, Step = {} | Previous Best Score {}, Step = {}".format(
                         current_f1,
                         global_step,
                         best_f1,
@@ -369,7 +369,7 @@ class Learner():
                 
                 # write to log every verbose_int
                 if global_step % self.verbose_int == 0:
-                    log.info('='*40+'Iteration {} of {} | Average Training Loss {:.6f} |'\
+                    log.info('='*40+' Iteration {} of {} | Average Training Loss {:.6f} |'\
                              ' Best Val F1 {} | Best Iteration {} |'.format(
                                  global_step,
                                  self.max_steps,
@@ -381,7 +381,7 @@ class Learner():
                 
                 # save every log_int
                 if global_step % self.log_int == 0:
-                    log.info("="*40+"Storing data for plotting on task {} step {}".format(task, global_step))
+                    log.info("="*40+" Storing data for plotting on task {} step {}".format(task, global_step))
                     log_results = self.evaluate(task, best_model, prefix = '{}_log'.format(task))
                     log_f1 = log_results.get('f1')
                     

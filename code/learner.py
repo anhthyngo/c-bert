@@ -153,6 +153,10 @@ class Learner():
         # model outputs are always tuple in transformers (see doc)
         loss = out[0]
         
+        # for multi-gpu
+        if isinstance(self.model, nn.DataParallel):
+            loss = loss.mean() # average on multi-gpu parallel training
+        
         # calculate gradients through back prop
         if self.fp16:
             with amp.scale_loss(loss, self.optimizer) as scaled_loss:

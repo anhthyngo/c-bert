@@ -339,9 +339,15 @@ class Learner():
                 
                 # check for best every best_int
                 if global_step % self.best_int == 0:
-                    log.info("Evaluating {} on step: {}".format(task, global_step))
+                    log.info("="*40+"Evaluating {} on step: {}".format(task, global_step))
                     val_results = self.evaluate(task, prefix = '{}_current'.format(task))
                     current_f1 = val_results.get('f1')
+                    
+                    log.info("="*40+"Current Score {}, Step = {} | Best Score {}, , Step = {}".format(
+                        current_f1,
+                        global_step,
+                        best_f1,
+                        best_iter))
                     
                     if current_f1 > best_f1:
                         best_f1 = current_f1
@@ -363,7 +369,7 @@ class Learner():
                 
                 # write to log every verbose_int
                 if global_step % self.verbose_int == 0:
-                    log.info('Iteration {} of {} | Average Training Loss {:.6f} |'\
+                    log.info('='*40+'Iteration {} of {} | Average Training Loss {:.6f} |'\
                              ' Best Val F1 {} | Best Iteration {} |'.format(
                                  global_step,
                                  self.max_steps,
@@ -375,7 +381,7 @@ class Learner():
                 
                 # save every log_int
                 if global_step % self.log_int == 0:
-                    log.info("Storing data for plotting on task {} step {}".format(task, global_step))
+                    log.info("="*40+"Storing data for plotting on task {} step {}".format(task, global_step))
                     log_results = self.evaluate(task, best_model, prefix = '{}_log'.format(task))
                     log_f1 = log_results.get('f1')
                     
@@ -408,7 +414,7 @@ class Learner():
         
         # final check for best if not already checked
 # =============================================================================
-#         log.info("Final check for training on: {}".format(task))
+#         log.info("="*40+"Final check for training on: {}".format(task))
 #         if global_step % self.best_int != 0:
 #             val_results = self.evaluate(task, prefix = '{}_current'.format(task))
 #             current_f1 = val_results.get('f1')

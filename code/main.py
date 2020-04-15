@@ -126,7 +126,6 @@ def main():
     log.info("Generating Plot")
     # generate BERT plot
     plot = analyze.plot_learning(c_learner.scores)
-    plot.show
     plot_name = os.path.join(os.getcwd(),"{}_{}_{}.png".format(parser.experiment, parser.model, dt.now().strftime("%Y%m%d_%H%M")))
     plot.savefig(plot_name)
     log.info("Plot saved at: {}".format(plot_name))

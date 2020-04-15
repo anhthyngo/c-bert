@@ -128,7 +128,9 @@ def main():
     # generate BERT plot
     now = dt.now().strftime("%Y%m%d_%H%M")
     
-    plot = analyze.plot_learning(c_learner.scores)
+    plot = analyze.plot_learning(c_learner.scores,
+                                 x_tick_int = 2*parser.logging_steps,
+                                 iterations = parser.fine_tune_steps)
     plot_name = os.path.join(os.getcwd(),"{}_{}_{}.png".format(parser.experiment, parser.model, now))
     plot.savefig(plot_name)
     log.info("Plot saved at: {}".format(plot_name))

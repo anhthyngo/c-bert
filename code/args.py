@@ -128,11 +128,11 @@ args.add_argument('--max_answer_length',
 args.add_argument('--logging_steps',
                   type=int,
                   default=1e4,
-                  help='saves best weights every X update steps')
+                  help='logs best weights every X update steps for experiment')
 args.add_argument('--save_steps',
                   type=int,
                   default=500,
-                  help='Save best weights every X update steps')
+                  help='save best weights every X update steps')
 args.add_argument('--verbose_steps',
                   type=int,
                   default=1000,

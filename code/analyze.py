@@ -8,21 +8,29 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 colors = {
-        "BERT Trivia-web"      : "mediumseagreen",
-        "BERT SQuAD"           : "orange",
-        "Meta-BERT Trivia-web" : "tab:blue",
-        "Meta-BERT SQuAD"      : "tab:pink"
+        "BERT TriviaQA-web"      : "mediumseagreen",
+        "BERT SQuAD"             : "orange",
+        "Meta-BERT TriviaQA-web" : "tab:blue",
+        "Meta-BERT SQuAD"        : "tab:pink"
         }
 
 markers = {
-        "BERT Trivia-web"       : "o",
-        "BERT SQuAD"            : "^",
-        "Meta-BERT Trivia-web"  : "P",
-        "Meta-BERT SQuAD"       : "X"
+        "BERT TriviaQA-web"       : "o",
+        "BERT SQuAD"              : "^",
+        "Meta-BERT TriviaQA-web"  : "P",
+        "Meta-BERT SQuAD"         : "X"
         }
+
+names = {
+    "BERT TriviaQA-web"       : "BERT Trivia",
+    "BERT SQuAD"              : "BERT SQuAD",
+    "Meta-BERT TriviaQA-web"  : "Meta-BERT Trivia",
+    "Meta-BERT SQuAD"         : "Meta-BERT SQuAD"
+    }
 
 def plot_learning(
         data,                            # dictionary of dictionaries of data
+        title = None,                    # title for plot
         iter_key = "iter",               # iteration key word
         val_key = "f1",                  # validation key word
         score_type = "F1",               # score type for label name
@@ -85,10 +93,11 @@ def plot_learning(
         
         # Add dataset labels
         plt.text(temp_iter[-1]+label_x_offset, temp_val[-1]-label_y_offset,
-                 key+" "+score_type, color=colors.get(key))
+                 names.get(key)+" "+score_type, color=colors.get(key))
         
         # Add title
-        plt.title("bert model scores")
+        if not title is None:
+            plt.title(title)
         
         # Adjust layout
         fig.tight_layout()

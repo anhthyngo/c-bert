@@ -89,4 +89,30 @@ class ContLearner():
                 # store best SQuAD weights
                 best_prev_weights.append(best_path)
                 prev_tasks.append(task)
+    
+    def test_learn(self):
+        best_prev_weights = []
+        prev_tasks = []
+        inc = 0.5
+        
+        for i, task in enumerate(self.curriculum):
+            paths, f1, best_path = [1], [inc*(i+1)], None
             
+            temp_iter = np.arange(len(f1)) # every 10k
+            
+            if i == len(self.curriculum) - 1:
+                # we want rln weights for trivia
+                self.scores['{} {}'.format(self.model_name, task)]['f1'] = f1
+                self.scores['{} {}'.format(self.model_name, task)]['iter'] = temp_iter
+                
+                
+                # loading best models for previous tasks
+                for j, prev_task in enumerate(prev_tasks):
+                    for k, path in enumerate(paths):
+                        self.scores['{} {}'.format(self.model_name, prev_task)]['f1'].append(inc*(k+1))
+                        
+                        self.scores['{} {}'.format(self.model_name, prev_task)]['iter'] = temp_iter
+            else:
+                # store best SQuAD weights
+                best_prev_weights.append(best_path)
+                prev_tasks.append(task)

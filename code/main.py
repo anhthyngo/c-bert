@@ -44,14 +44,14 @@ def main():
                     level=log.DEBUG)
     
     # set devise to CPU if available
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     log.info("Device is {}".format(device))
     
     # set seed for replication
     random.seed(parser.seed)
     np.random.seed(parser.seed)
     torch.manual_seed(parser.seed)
-    if device == "cuda":
+    if torch.cuda.is_available():
         torch.cuda.manual_seed_all(parser.seed)
     
     log.info("Starting experiment {} on {} with model {}".format(

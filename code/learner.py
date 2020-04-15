@@ -114,6 +114,11 @@ class Learner():
             amp.register_half_function(torch, "einsum")
             self.model, self.optimizer = amp.initialize(model, optimizer, opt_level=self.fp16_opt_level)
         
+        # if multiple GPUs on single device
+        if torch.cuda.is_available() and torch.cuda.device_count() > 1:
+            self.model = nn.DataParallel(model)
+            self.model.to(self.device)
+        
     def train_step(self,
                    batch,
                    idx
@@ -190,6 +195,9 @@ class Learner():
         if model is None:
             model = self.model
         else:
+            if torch.cuda.is_available() and torch.cuda.device_count() > 1 and not isinstance(model, nn.DataParallel):
+                # multiple GPUs
+                model = torch.nn.DataParallel(model)
             model.to(self.device)
         
         # puts model in evaluation mode

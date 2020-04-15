@@ -174,7 +174,7 @@ def check_args(parser):
     assert parser.version_2_with_negative == False, "Only supports version 1 without negatives"
     assert (parser.do_lower_case and parser.model.find('uncased') != -1) or (not parser.do_lower_case and parser.model.find('uncased') == -1), "do_lower_case associated with uncased model"
     
-    assert (parser.batch_size > 16 and parser.fp16) or parser.batch_size <= 16, "Need mixed point precision for batch size greater than 16"
+    #assert (parser.batch_size > 16 and parser.fp16) or parser.batch_size <= 16, "Need mixed point precision for batch size greater than 16"
     
     if parser.fp16:
         try:

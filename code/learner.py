@@ -57,7 +57,7 @@ class Learner():
         self.fp16 = fp16
         self.fp16_opt_level = fp16_opt_level
         
-        self.model = model
+        self.model = model.to(device)
         self.model_name = model_name
         self.device = device
         self.IO = myio
@@ -113,9 +113,6 @@ class Learner():
             from apex import amp
             amp.register_half_function(torch, "einsum")
             self.model, self.optimizer = amp.initialize(model, optimizer, opt_level=self.fp16_opt_level)
-        
-        # sending model to device should be done after mixed precision
-        self.model.to(self.device)
         
     def train_step(self,
                    batch,

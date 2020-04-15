@@ -3,14 +3,16 @@ Testing for implementations - Will
 """
 
 import torch
-import analyze
 import numpy as np
 from datetime import datetime as dt
 import os
 import json
 import logging as log
 import transformers
+
 import myio
+import cont_learning
+import analyze
 
 if __name__ == '__main__':
     wd = os.getcwd()
@@ -60,7 +62,7 @@ if __name__ == '__main__':
         
     # ============================= Testing Data Loading ==============================
     
-    if True:
+    if False:
         data_dir = 'data'
         task_names = ['tester']
         tokenizer = transformers.AutoTokenizer.from_pretrained('bert-base-uncased') 
@@ -131,13 +133,20 @@ if __name__ == '__main__':
             
         for example in examples_dev2:
             print('\n{}'.format(type(example)))
+    
+    if False:
+       c_learner = cont_learning.ContLearner(None, 'BERT', torch.nn.Linear(1,1))
+       c_learner.test_learn()
         
+       plot = analyze.plot_learning(c_learner.scores, iterations=10, max_score=20, x_tick_int=2, y_tick_int=10)
+       plot.savefig("test_fig_{}.png".format(dt.now().strftime("%Y%m%d_%H%M")))
+    
     # release logs from Python
     handlers = log.getLogger().handlers
     for handler in handlers:
         handler.close()
             
-            
+   
             
             
             

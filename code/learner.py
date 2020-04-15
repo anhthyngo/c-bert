@@ -330,7 +330,7 @@ class Learner():
         
         self.model.zero_grad()
         for epoch in train_iterator:
-            epoch_iterator = tqdm(train_dataloader, desc='Iteration')
+            epoch_iterator = tqdm(train_dataloader, desc='Iteration', mininterval=5)
             for step, batch in enumerate(epoch_iterator):
                 
                 self.model.train()

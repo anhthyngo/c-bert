@@ -343,7 +343,7 @@ class Learner():
                     val_results = self.evaluate(task, prefix = '{}_current'.format(task))
                     current_f1 = val_results.get('f1')
                     
-                    log.info("="*40+"Current Score {}, Step = {} | Best Score {}, , Step = {}".format(
+                    log.info("="*40+"Current Score {}, Step = {} | Previous Best Score {}, Step = {}".format(
                         current_f1,
                         global_step,
                         best_f1,

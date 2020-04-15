@@ -56,6 +56,7 @@ class ContLearner():
             paths, f1, best_path = self.learner.fine_tune(task)
             
             temp_iter = self.learner.log_int*np.arange(len(f1)) # every 10k
+            temp_iter = temp_iter.tolist()
             
             if i == len(self.curriculum) - 1:
                 # we want rln weights for trivia

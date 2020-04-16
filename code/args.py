@@ -21,7 +21,7 @@ args.add_argument('--save_dir',
                   help='directory to save results')
 args.add_argument('--seed',
                   type=int,
-                  default=1111,
+                  default=42,
                   help='random seed')
 args.add_argument('--run_log',
                   type=str,
@@ -98,7 +98,7 @@ args.add_argument('--fine_tune_steps',
                   help='number of updates for fine-tuning')
 args.add_argument('--learning_rate', 
                   type=float, 
-                  default=5e-5,
+                  default=3e-5,
                   help='initial learning rate for Adam')
 args.add_argument("--weight_decay",
                   type=float,

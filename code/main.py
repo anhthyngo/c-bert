@@ -127,20 +127,31 @@ def main():
     # generate BERT plot
     now = dt.now().strftime("%Y%m%d_%H%M")
     
+    # create results folders if not generated
+    plot_dir = os.path.join(parser.save_dir, "plots")
+    json_dir = os.path.join(parser.save_dir, "json_results")
+    
+    if not os.path.exists(plot_dir):
+        os.mkdir(plot_dir)
+    
+    if not os.path.exists(json_dir):
+        os.mkdir(json_dir)
+    
+    # plot results and save
     plot = analyze.plot_learning(c_learner.scores,
                                  x_tick_int = 2*parser.logging_steps,
                                  iterations = parser.fine_tune_steps)
-    plot_name = os.path.join(os.getcwd(),"{}_{}_{}.png".format(parser.experiment, parser.model, now))
+    plot_name = os.path.join(plot_dir,"baseline_{}_{}_{}.png".format(parser.experiment, parser.model, now))
     plot.savefig(plot_name)
     log.info("Plot saved at: {}".format(plot_name))
     
     # write data to json
-    baseline_results_name = os.path.join(os.getcwd(), "{}_{}_{}.json".format(parser.experiment, parser.model, now))
+    baseline_results_name = os.path.join(json_dir, "baseline_{}_{}_{}.json".format(parser.experiment, parser.model, now))
     with open(baseline_results_name, 'w') as fw:
         json.dump(c_learner.scores, fw)
     log.info("Baseline results written to: {}".format(baseline_results_name))
     
-    log.info("Total time is: {:.0f}min".format((time.time()-start)/60))
+    log.info("Total time is: {}min : {}s".format((time.time()-start)//60, (time.time()-start)%60))
     
 if __name__ == "__main__":
     main()

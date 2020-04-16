@@ -327,6 +327,7 @@ class Learner():
         torch.save(rln_state_dict, log_rln_weights)
         logged_rln_paths.append(log_rln_weights)
         logged_f1s.append(zero_shot.get('f1'))
+        best_f1 = zero_shot.get('f1')
         
         self.model.zero_grad()
         for epoch in train_iterator:

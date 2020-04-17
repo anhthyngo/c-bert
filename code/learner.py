@@ -61,7 +61,7 @@ class Learner():
         self.device = device
         self.IO = myio
         self.save_dir = save_dir
-        self.max_steps = max_steps + 1 # +1 to record the 100,000th step
+        self.max_steps = max_steps
         self.log_int = log_int
         self.best_int = best_int
         self.verbose_int = verbose_int
@@ -414,11 +414,11 @@ class Learner():
                 
                 global_step += 1
                 
-                # break training if max steps reached (-1 to match Huggingface)
-                if global_step > self.max_steps:
+                # break training if max steps reached (+1 to get max_step)
+                if global_step > self.max_steps+1:
                     epoch_iterator.close()
                     break
-            if global_step > self.max_steps:
+            if global_step > self.max_steps+1:
                 train_iterator.close()
                 break
             

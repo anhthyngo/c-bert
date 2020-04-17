@@ -84,11 +84,17 @@ class Learner():
         self.version_2_with_negative = version_2_with_negative
         self.null_score_diff_threshold = null_score_diff_threshold
         
+        # data
+        self.train_dataloader = None
+        self.val_dataloader = None
+        self.val_examples = None
+        self.val_features = None
+        
         # set optimizer
         self.optimizer = optimizer
         
         if optimizer is None:
-            self.optimizer = self.set_optimizer()
+            self.set_optimizer()
         
         # use mixed precision if needed
         if self.fp16:
@@ -184,7 +190,8 @@ class Learner():
     def evaluate(self,
                  task,
                  model = None,
-                 prefix = ""
+                 prefix = "",
+                 load = False
                  ):
         """
         Evaluation model on task.
@@ -209,8 +216,11 @@ class Learner():
         # puts model in evaluation mode
         model.eval()
         
-        # get dictionary of DataLoader, examples, features        
-        val_dataloader, features, examples = self.IO.load_and_cache_task(task, 'dev')
+        # get dictionary of DataLoader, examples, features  
+        if load:
+            val_dataloader, features, examples = self.IO.load_and_cache_task(task, 'dev')
+        else:
+            val_dataloader, features, examples = self.val_dataloader, self.features, self.examples
         
         all_results = []
         
@@ -311,10 +321,11 @@ class Learner():
         best_model = copy.deepcopy(self.model)
         
         # load data
-        train_dataloader,_,_ = self.IO.load_and_cache_task(task, 'train')
+        self.train_dataloader,_,_ = self.IO.load_and_cache_task(task, 'train')
+        self.val_dataloader, self.val_features, self.val_examples = self.IO.load_and_cache_task(task, 'dev')
         
         # set number of epochs based on number of iterations
-        max_epochs = self.max_steps // len(train_dataloader) + 1
+        max_epochs = self.max_steps // len(self.train_dataloader) + 1
         
 
         # train
@@ -340,7 +351,7 @@ class Learner():
         
         self.model.zero_grad()
         for epoch in train_iterator:
-            epoch_iterator = tqdm(train_dataloader, desc='Epoch Iteration', mininterval=30)
+            epoch_iterator = tqdm(self.train_dataloader, desc='Epoch Iteration', mininterval=30)
             for step, batch in enumerate(epoch_iterator):
                 
                 self.model.train()

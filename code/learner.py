@@ -43,7 +43,6 @@ class Learner():
                  verbose_int = 1000,
                  max_grad_norm = 1.0,
                  optimizer = None,
-                 scheduler = None,
                  weight_decay = 0.0,
                  lr = 5e-3,
                  eps = 1e-8,
@@ -67,6 +66,7 @@ class Learner():
         self.best_int = best_int
         self.verbose_int = verbose_int
         self.max_grad_norm = max_grad_norm
+        self.warmup_steps = warmup_steps
         self.log_dir = os.path.join(self.save_dir, 'logged')
         
         # make directory for recorded weights if doesn't already exist
@@ -81,12 +81,10 @@ class Learner():
         self.version_2_with_negative = version_2_with_negative
         self.null_score_diff_threshold = null_score_diff_threshold
         
-        # set optimizer and scheduler
+        # set optimizer
         self.optimizer = optimizer
-        self.scheduler = scheduler
         
         if optimizer is None:
-            assert scheduler is None, "Optimizer not defined, so scheduler should not be defined."
             
             # don't apply weight decay to bias and LayerNorm weights
             no_decay = ['bias', 'LayerNorm.weight']
@@ -102,11 +100,6 @@ class Learner():
             ]
             
             self.optimizer = opt.AdamW(optimizer_grouped_parameters, lr=lr, eps=eps)
-            
-        if scheduler is None:
-            self.scheduler = transformers.optimization.get_linear_schedule_with_warmup(
-                self.optimizer, num_warmup_steps=warmup_steps, num_training_steps=max_steps
-            )
         
         # use mixed precision if needed
         if self.fp16:
@@ -121,7 +114,8 @@ class Learner():
         
     def train_step(self,
                    batch,
-                   idx
+                   idx,
+                   scheduler,
                    ):
         """
         Training for a single batch.
@@ -172,7 +166,7 @@ class Learner():
             
         #take a step in gradient descent
         self.optimizer.step()
-        self.scheduler.step()
+        scheduler.step()
         
         # zero gradients
         self.model.zero_grad()
@@ -270,7 +264,8 @@ class Learner():
         
     def fine_tune(self,
                   task,
-                  model_name = None
+                  model_name = None,
+                  scheduler = None,
                   ):
         """
         Fine-tune model on task
@@ -281,6 +276,12 @@ class Learner():
         logged_f1        - list of best validation f1 scores
         best_path        - path of best weights
         """
+        # set up learning rate scheduler
+        if scheduler is None:
+            scheduler = transformers.optimization.get_linear_schedule_with_warmup(
+                self.optimizer, num_warmup_steps=self.warmup_steps, num_training_steps=self.max_steps
+                )
+        
         if model_name is None:
             model_name = self.model_name
         
@@ -335,7 +336,7 @@ class Learner():
             for step, batch in enumerate(epoch_iterator):
                 
                 self.model.train()
-                iter_loss = self.train_step(batch, step)
+                iter_loss = self.train_step(batch, step, scheduler)
                 cum_loss += iter_loss
                 
                 # check for best every best_int
@@ -412,31 +413,6 @@ class Learner():
             if global_step > self.max_steps:
                 train_iterator.close()
                 break
-        
-        # final check for best if not already checked
-# =============================================================================
-#         log.info("="*40+"Final check for training on: {}".format(task))
-#         if global_step % self.best_int != 0:
-#             val_results = self.evaluate(task, prefix = '{}_current'.format(task))
-#             current_f1 = val_results.get('f1')
-#                     
-#             if current_f1 > best_f1:
-#                 best_f1 = current_f1
-#                 best_iter = global_step
-#                 # for multi-gpu
-#                 if isinstance(self.model, nn.DataParallel):
-#                     best_state_dict = self.model.module.state_dict()
-#                 else:
-#                     best_state_dict = self.model.state_dict()
-#                 
-#                 torch.save(best_state_dict, best_path)
-#                     
-#                 # for multi-gpu
-#                 if isinstance(best_model, nn.DataParallel):
-#                     best_model.module.load_state_dict(torch.load(best_path))
-#                 else:
-#                     best_model.load_state_dict(torch.load(best_path))
-# =============================================================================
             
         # log finished results
         log.info('Finished | Average Training Loss {:.6f} |'\

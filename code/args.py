@@ -37,6 +37,13 @@ args.add_argument('--continual_curriculum',
                   help='tasks in order for continual learning, separated by ,')
 
 # =============================================================================
+# for continual learning
+# =============================================================================
+args.add_argument('--no_prev_fine_tune',
+                  action='store_true',
+                  help='used to indicate only fine_tuning on last task in curriculum')
+
+# =============================================================================
 # for model definition
 # =============================================================================
 args.add_argument('--model',

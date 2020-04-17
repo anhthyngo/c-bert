@@ -88,7 +88,7 @@ def main():
 # BASELINE
 # =============================================================================
     # create BERT model
-    BERTmodel = model.QAModel(config)
+    BERTmodel = model.QAModel(parser.model, config)
     
     # create learner object for BERT model
     trainer = learner.Learner(parser.fp16,

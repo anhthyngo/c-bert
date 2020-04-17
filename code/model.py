@@ -20,6 +20,7 @@ import os
 
 class QAModel(nn.Module):
     def __init__(self,
+                 hf_model_name,       # model name from Huggingface
                  config,              # Huggingface configuration object for model
                  load_rln = False,    # bool whether to load preloaded rln
                  rln_weights = None   # name of state dict with rln weights
@@ -34,10 +35,11 @@ class QAModel(nn.Module):
         """
         
         super(QAModel, self).__init__()
+        self.hf_model_name = hf_model_name
         self.num_labels = config.num_labels
 
         # Define model
-        self.model = transformers.AutoModelForQuestionAnswering.from_config(config)
+        self.model = transformers.AutoModelForQuestionAnswering.from_pretrained(hf_model_name, config=config)
         
         # load meta learned weights 
         # only supporting BERT for now

@@ -88,7 +88,7 @@ class Learner():
         self.optimizer = optimizer
         
         if optimizer is None:
-            self.optimizer = self.set_optimizer(self.model)
+            self.optimizer = self.set_optimizer()
         
         # use mixed precision if needed
         if self.fp16:

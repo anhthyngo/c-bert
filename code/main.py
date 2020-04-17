@@ -98,7 +98,7 @@ def main():
         penultimate_task_weights = os.path.join(parser.save_dir, '{}_{}_best.pt'.format(parser.model,
                                                                                         parser.continual_curriculum[len(parser.continual_curriculum)-2]))
         
-        assert os.path.exist(penultimate_task_weights), "Punultimate best weights do not exist or have not been trained"
+        assert os.path.exist(penultimate_task_weights), "Penultimate best weights do not exist or have not been trained: {}".format(penultimate_task_weights)
         BERTmodel.load_state_dict(torch.load(penultimate_task_weights))
     
     # create learner object for BERT model

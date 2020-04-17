@@ -138,6 +138,9 @@ class ContLearner():
                     self.unsupervised_model.module.model.bert.load_state_dict(torch.load(last_task_rln_weights))
                 else:
                     self.unsupervised_model.model.bert.load_state_dict(torch.load(last_task_rln_weights))
-                
-                zero_results = self.learner.evaluate(prev_task, self.unsupervised_model, prefix = 'forget_{}_{}'.format(prev_task, self.hf_model_name))
+                                    
+                zero_results = self.learner.evaluate(prev_task, 
+                                                     self.unsupervised_model, 
+                                                     prefix = 'forget_{}_{}'.format(prev_task, self.hf_model_name),
+                                                     load=(j==0))
                 self.scores['{} {}'.format(self.model_name, prev_task)]['f1'].append(zero_results.get('f1'))

@@ -220,7 +220,7 @@ class Learner():
         if load:
             val_dataloader, features, examples = self.IO.load_and_cache_task(task, 'dev')
         else:
-            val_dataloader, features, examples = self.val_dataloader, self.features, self.examples
+            val_dataloader, features, examples = self.val_dataloader, self.val_features, self.val_examples
         
         all_results = []
         

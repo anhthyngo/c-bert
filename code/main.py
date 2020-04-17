@@ -121,7 +121,6 @@ def main():
                               verbose_int = parser.verbose_steps,
                               max_grad_norm = parser.max_grad_norm,
                               optimizer = None,
-                              scheduler = None,
                               weight_decay = parser.weight_decay,
                               lr = parser.learning_rate,
                               eps = parser.adam_epsilon,

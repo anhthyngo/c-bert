@@ -66,6 +66,9 @@ class Learner():
         self.best_int = best_int
         self.verbose_int = verbose_int
         self.max_grad_norm = max_grad_norm
+        self.weight_decay = weight_decay
+        self.lr = lr
+        self.eps = eps
         self.warmup_steps = warmup_steps
         self.log_dir = os.path.join(self.save_dir, 'logged')
         
@@ -85,33 +88,38 @@ class Learner():
         self.optimizer = optimizer
         
         if optimizer is None:
-            
-            # don't apply weight decay to bias and LayerNorm weights
-            no_decay = ['bias', 'LayerNorm.weight']
-            optimizer_grouped_parameters = [
-                {
-                    "params"       : [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
-                    "weight_decay" : weight_decay
-                },
-                {
-                    "params"       : [p for n, p in self.model.named_parameters() if any(nd in n for nd in no_decay)],
-                    "weight_decay" : 0.0
-                }
-            ]
-            
-            self.optimizer = opt.AdamW(optimizer_grouped_parameters, lr=lr, eps=eps)
+            self.optimizer = self.set_optimizer(self.model)
         
         # use mixed precision if needed
         if self.fp16:
             from apex import amp
             amp.register_half_function(torch, "einsum")
-            self.model, self.optimizer = amp.initialize(model, optimizer, opt_level=self.fp16_opt_level)
+            self.model, self.optimizer = amp.initialize(self.model, self.optimizer, opt_level=self.fp16_opt_level)
         
         # if multiple GPUs on single device
         if torch.cuda.is_available() and torch.cuda.device_count() > 1:
             self.model = nn.DataParallel(model)
             self.model.to(self.device)
-        
+    
+    def set_optimizer(self):
+        """
+        Set optimizer for learner object using model.
+        """
+        # don't apply weight decay to bias and LayerNorm weights
+        no_decay = ['bias', 'LayerNorm.weight']
+        optimizer_grouped_parameters = [
+            {
+                "params"       : [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
+                "weight_decay" : self.weight_decay
+            },
+            {
+                "params"       : [p for n, p in self.model.named_parameters() if any(nd in n for nd in no_decay)],
+                "weight_decay" : 0.0
+            }
+        ]
+            
+        self.optimizer = opt.AdamW(optimizer_grouped_parameters, lr=self.lr, eps=self.eps)
+    
     def train_step(self,
                    batch,
                    idx,

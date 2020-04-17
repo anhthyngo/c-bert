@@ -23,7 +23,7 @@ class ContLearner():
         self.hf_model_name = hf_model_name
         self.model_name = model_name
         self.learner = learner
-        self.model = copy.deepcopy(learner.model)
+        self.unsupervised_model = copy.deepcopy(learner.model)
         self.curriculum = curriculum
         self.fine_tune_prev = fine_tune_prev
         self.max_steps = learner.max_steps
@@ -53,17 +53,39 @@ class ContLearner():
         'model' can do continual learning.
         
         Curriculum: Unsupervised -> SQuAD -> TriviaQA
-        """        
+        """   
+        prev_task = None
+        
         for i, task in enumerate(self.curriculum):
             if (i == len(self.curriculum) - 1) or self.fine_tune_prev:
                 log.info("Fine-Tuning: {}".format(task))
+                
+                # load best weights from previous task
+                if not prev_task is None:
+                    prev_task_rln_weights = os.path.join(self.log_dir,
+                                                         self.hf_model_name,
+                                                         prev_task,
+                                                         '{}.pt'.format(self.max_steps))
+                    assert os.path.exists(prev_task_rln_weights), "Previous best RLN weights do not exist or have not been trained: {}".format(prev_task_rln_weights)
+                    
+                    # load best RLN weights for previous task
+                    if isinstance(self.model, nn.DataParallel):
+                        self.unsupervised_model.module.model.bert.load_state_dict(torch.load(prev_task_rln_weights))
+                    else:
+                        self.unsupervised_model.model.bert.load_state_dict(torch.load(prev_task_rln_weights))
+                    
+                    log.info("Reset learner object for task {}".format(task))
+                    self.learner.model = copy.deepcopy(self.unsupervised_model)
+                    self.learner.set_optimizer()
+                
                 # fine tune model on task
                 paths, f1, best_path = self.learner.fine_tune(task)
                 
                 if i == len(self.curriculum) - 1:
                     # we want rln weights for trivia
                     self.scores['{} {}'.format(self.model_name, task)]['f1'] = f1
-                    
+            
+            prev_task = task
 # =============================================================================
 #                     
 #                     # loading best models for previous tasks

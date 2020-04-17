@@ -93,14 +93,6 @@ def main():
     # create BERT model
     BERTmodel = model.QAModel(parser.model, config)
     
-    # if not fine tuning previous tasks, load penultimate best weights
-    if parser.no_prev_fine_tune:
-        penultimate_task_weights = os.path.join(parser.save_dir, '{}_{}_best.pt'.format(parser.model,
-                                                                                        parser.continual_curriculum[len(parser.continual_curriculum)-2]))
-        
-        assert os.path.exists(penultimate_task_weights), "Penultimate best weights do not exist or have not been trained: {}".format(penultimate_task_weights)
-        BERTmodel.load_state_dict(torch.load(penultimate_task_weights))
-    
     # create learner object for BERT model
     trainer = learner.Learner(parser.fp16,
                               parser.fp16_opt_level,

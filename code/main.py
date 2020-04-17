@@ -87,8 +87,19 @@ def main():
 # =============================================================================
 # BASELINE
 # =============================================================================
+    # parse continual learning curriculum    
+    parser.continual_curriculum = parser.continual_curriculum.split(',')
+    
     # create BERT model
     BERTmodel = model.QAModel(parser.model, config)
+    
+    # if not fine tuning previous tasks, load penultimate best weights
+    if parser.no_prev_fine_tune:
+        penultimate_task_weights = os.path.join(parser.save_dir, '{}_{}_best.pt'.format(parser.model,
+                                                                                        parser.continual_curriculum[len(parser.continual_curriculum)-2]))
+        
+        assert os.path.exist(penultimate_task_weights), "Punultimate best weights do not exist or have not been trained"
+        BERTmodel.load_state_dict(torch.load(penultimate_task_weights))
     
     # create learner object for BERT model
     trainer = learner.Learner(parser.fp16,
@@ -117,11 +128,14 @@ def main():
                               warmup_steps = parser.warmup_steps)
     
     # create continual learning object and perform continual learning
-    parser.continual_curriculum = parser.continual_curriculum.split(',')
     c_learner = cont_learning.ContLearner(parser.model,
                                           'BERT',
                                           trainer,
-                                          curriculum = parser.continual_curriculum)
+                                          curriculum = parser.continual_curriculum,
+                                          fine_tune_prev = not parser.no_prev_fine_tune)
+    
+    if len(parser.continual_curriculum) > 1:
+        c_learner.evaluate_forgetting()
     
     log.info("Generating Plot")
     # generate BERT plot

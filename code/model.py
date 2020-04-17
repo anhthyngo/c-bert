@@ -23,7 +23,7 @@ class QAModel(nn.Module):
                  hf_model_name,       # model name from Huggingface
                  config,              # Huggingface configuration object for model
                  load_rln = False,    # bool whether to load preloaded rln
-                 rln_weights = None   # name of state dict with rln weights
+                 rln_weights = None,  # name of state dict with rln weights
                  ):
         
         """

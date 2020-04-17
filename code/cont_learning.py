@@ -69,7 +69,7 @@ class ContLearner():
                     assert os.path.exists(prev_task_rln_weights), "Previous best RLN weights do not exist or have not been trained: {}".format(prev_task_rln_weights)
                     
                     # load best RLN weights for previous task
-                    if isinstance(self.model, nn.DataParallel):
+                    if isinstance(self.unsupervised_model, nn.DataParallel):
                         self.unsupervised_model.module.model.bert.load_state_dict(torch.load(prev_task_rln_weights))
                     else:
                         self.unsupervised_model.model.bert.load_state_dict(torch.load(prev_task_rln_weights))
@@ -123,10 +123,10 @@ class ContLearner():
             # load best weights of previous task
             best_prev_weights = os.path.join(self.save_dir, "{}_{}_best.pt".format(self.hf_model_nam, prev_task))
             
-            if isinstance(self.model, nn.DataParallel):
-                self.model.module.load_state_dict(torch.load(best_prev_weights))
+            if isinstance(self.unsupervised_model, nn.DataParallel):
+                self.unsupervised_model.module.load_state_dict(torch.load(best_prev_weights))
             else:
-                self.model.load_state_dict(torch.load(best_prev_weights))
+                self.unsupervised_model.load_state_dict(torch.load(best_prev_weights))
             
             # evaluate forgetting for each log_int of last task
             for j in np.arange(start=0, stop=(self.max_steps+self.log_int), step=self.log_int).tolist():
@@ -134,10 +134,10 @@ class ContLearner():
                 
                 last_task_rln_weights = os.path.join(self.log_dir, self.hf_model_name, last_task, "{}.pt".format(j))
                 
-                if isinstance(self.model, nn.DataParallel):
-                    self.model.module.model.bert.load_state_dict(torch.load(last_task_rln_weights))
+                if isinstance(self.unsupervised_model, nn.DataParallel):
+                    self.unsupervised_model.module.model.bert.load_state_dict(torch.load(last_task_rln_weights))
                 else:
-                    self.model.model.bert.load_state_dict(torch.load(last_task_rln_weights))
+                    self.unsupervised_model.model.bert.load_state_dict(torch.load(last_task_rln_weights))
                 
-                zero_results = self.learner.evaluate(prev_task, self.model, prefix = 'forget_{}_{}'.format(prev_task, self.hf_model_name))
+                zero_results = self.learner.evaluate(prev_task, self.unsupervised_model, prefix = 'forget_{}_{}'.format(prev_task, self.hf_model_name))
                 self.scores['{} {}'.format(self.model_name, prev_task)]['f1'].append(zero_results.get('f1'))

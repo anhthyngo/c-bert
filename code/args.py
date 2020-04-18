@@ -42,6 +42,12 @@ args.add_argument('--continual_curriculum',
 args.add_argument('--no_prev_fine_tune',
                   action='store_true',
                   help='used to indicate only fine_tuning on last task in curriculum')
+args.add_argument('--no_cont_learning',
+                  action='store_true',
+                  help='used to indicate whether to perform continual learning')
+args.add_argument('--no_forget_eval',
+                  action='store_true',
+                  help='used to indicate whether to evaluate forgetting')
 
 # =============================================================================
 # for model definition

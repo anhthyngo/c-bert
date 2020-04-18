@@ -125,36 +125,40 @@ def main():
                                           curriculum = parser.continual_curriculum,
                                           fine_tune_prev = not parser.no_prev_fine_tune)
     
-    if len(parser.continual_curriculum) > 1:
+    log.info("Starting Continual Learning")
+    if not parser.no_cont_learning:
+        c_learner.c_learn()
+    
+    if len(parser.continual_curriculum) > 1 and not parser.no_forget_eval:
         c_learner.evaluate_forgetting()
     
-    log.info("Generating Plot")
-    # generate BERT plot
-    now = dt.now().strftime("%Y%m%d_%H%M")
-    
-    # create results folders if not generated
-    plot_dir = os.path.join(parser.save_dir, "plots")
-    json_dir = os.path.join(parser.save_dir, "json_results")
-    
-    if not os.path.exists(plot_dir):
-        os.mkdir(plot_dir)
-    
-    if not os.path.exists(json_dir):
-        os.mkdir(json_dir)
-    
-    # plot results and save
-    plot = analyze.plot_learning(c_learner.scores,
-                                 x_tick_int = 2*parser.logging_steps,
-                                 iterations = parser.fine_tune_steps)
-    plot_name = os.path.join(plot_dir,"baseline_{}_{}_{}.png".format(parser.experiment, parser.model, now))
-    plot.savefig(plot_name)
-    log.info("Plot saved at: {}".format(plot_name))
-    
-    # write data to json
-    baseline_results_name = os.path.join(json_dir, "baseline_{}_{}_{}.json".format(parser.experiment, parser.model, now))
-    with open(baseline_results_name, 'w') as fw:
-        json.dump(c_learner.scores, fw)
-    log.info("Baseline results written to: {}".format(baseline_results_name))
+        log.info("Generating Plot")
+        # generate BERT plot
+        now = dt.now().strftime("%Y%m%d_%H%M")
+        
+        # create results folders if not generated
+        plot_dir = os.path.join(parser.save_dir, "plots")
+        json_dir = os.path.join(parser.save_dir, "json_results")
+        
+        if not os.path.exists(plot_dir):
+            os.mkdir(plot_dir)
+        
+        if not os.path.exists(json_dir):
+            os.mkdir(json_dir)
+        
+        # plot results and save
+        plot = analyze.plot_learning(c_learner.scores,
+                                     x_tick_int = 2*parser.logging_steps,
+                                     iterations = parser.fine_tune_steps)
+        plot_name = os.path.join(plot_dir,"baseline_{}_{}_{}.png".format(parser.experiment, parser.model, now))
+        plot.savefig(plot_name)
+        log.info("Plot saved at: {}".format(plot_name))
+        
+        # write data to json
+        baseline_results_name = os.path.join(json_dir, "baseline_{}_{}_{}.json".format(parser.experiment, parser.model, now))
+        with open(baseline_results_name, 'w') as fw:
+            json.dump(c_learner.scores, fw)
+        log.info("Baseline results written to: {}".format(baseline_results_name))
     
     log.info("Total time is: {}min : {}s".format((time.time()-start)//60, (time.time()-start)%60))
     

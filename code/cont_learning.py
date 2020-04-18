@@ -36,11 +36,7 @@ class ContLearner():
             self.scores['{} {}'.format(model_name,task)] = {
                 'iter' : np.arange(start=0, stop=(self.max_steps+self.log_int), step=self.log_int).tolist(),
                 'f1'   : []
-                }
-        
-        # do continual learning
-        log.info("Starting Continual Learning")
-        self.c_learn()
+                }        
 
 # =============================================================================
 # Methods to do continual learning
@@ -85,31 +81,7 @@ class ContLearner():
                     # we want rln weights for trivia
                     self.scores['{} {}'.format(self.model_name, task)]['f1'] = f1
             
-            prev_task = task
-# =============================================================================
-#                     
-#                     # loading best models for previous tasks
-#                     for j, prev_task in enumerate(prev_tasks):
-#                         # for multi-gpu
-#                         if isinstance(self.model, nn.DataParallel):
-#                             self.model.module.load_state_dict(torch.load(best_prev_weights[j]))
-#                         else:
-#                             self.model.load_state_dict(torch.load(best_prev_weights[j]))
-#                             
-#                         for k, path in enumerate(paths):
-#                             log.info("Evaluating forgetting for {} on iteration: {}".format(prev_task, k))
-#                             
-#                             # get validation scores through zero-shot replacing RLN weights
-#                             # for multi-gpu
-#                             if isinstance(self.model, nn.DataParallel):
-#                                 self.model.module.model.bert.load_state_dict(torch.load(path))
-#                             else:
-#                                 self.model.model.bert.load_state_dict(torch.load(path))
-#                                 
-#                             zero_results = self.learner.evaluate(prev_task, self.model, prefix = 'forget_{}_{}'.format(prev_task, self.hf_model_name))
-#                             self.scores['{} {}'.format(self.model_name, prev_task)]['f1'].append(zero_results.get('f1'))
-# =============================================================================
-                    
+            prev_task = task                    
     
     def evaluate_forgetting(self):
         """

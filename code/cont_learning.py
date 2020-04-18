@@ -117,7 +117,7 @@ class ContLearner():
         """
         # get previous tasks and last-task name
         prev_tasks = self.curriculum[0:len(self.curriculum)-1]
-        last_task = self.curriculum[len(self.curriculum)]
+        last_task = self.curriculum[len(self.curriculum)-1]
         
         for i, prev_task in enumerate(prev_tasks):
             # load best weights of previous task

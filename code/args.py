@@ -35,6 +35,10 @@ args.add_argument('--continual_curriculum',
                   type=str,
                   default='SQuAD,TriviaQA-web',
                   help='tasks in order for continual learning, separated by ,')
+args.add_argument('--access_mode',
+                  type=int,
+                  default=777,
+                  help='access mode of files created')
 
 # =============================================================================
 # for continual learning

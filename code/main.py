@@ -27,7 +27,7 @@ from args import args, check_args  # module for parsing arguments for program
 def main():
     """
     Main method for experiment
-    """    
+    """ 
     start = time.time()
     repository = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
@@ -45,6 +45,7 @@ def main():
     log.basicConfig(filename=log_name,
                     format='%(asctime)s | %(name)s -- %(message)s',
                     level=log.DEBUG)
+    os.chmod(log_name, parser.access_mode)
     
     # set devise to CPU if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -94,7 +95,8 @@ def main():
     BERTmodel = model.QAModel(parser.model, config)
     
     # create learner object for BERT model
-    trainer = learner.Learner(parser.fp16,
+    trainer = learner.Learner(parser.access_mode,
+                              parser.fp16,
                               parser.fp16_opt_level,
                               BERTmodel,
                               parser.model,
@@ -152,12 +154,14 @@ def main():
                                      iterations = parser.fine_tune_steps)
         plot_name = os.path.join(plot_dir,"baseline_{}_{}_{}.png".format(parser.experiment, parser.model, now))
         plot.savefig(plot_name)
+        os.chmod(plot_name, parser.access_mode)
         log.info("Plot saved at: {}".format(plot_name))
         
         # write data to json
         baseline_results_name = os.path.join(json_dir, "baseline_{}_{}_{}.json".format(parser.experiment, parser.model, now))
         with open(baseline_results_name, 'w') as fw:
             json.dump(c_learner.scores, fw)
+        os.chmod(baseline_results_name, parser.access_mode)
         log.info("Baseline results written to: {}".format(baseline_results_name))
     
     log.info("Total time is: {}min : {}s".format((time.time()-start)//60, (time.time()-start)%60))

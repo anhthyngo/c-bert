@@ -24,6 +24,7 @@ import time
 
 class Learner():
     def __init__(self,
+                 access_mode,
                  fp16,
                  fp16_opt_level,
                  model,
@@ -55,6 +56,7 @@ class Learner():
         """
         self.fp16 = fp16
         self.fp16_opt_level = fp16_opt_level
+        self.access_mode = access_mode
         
         self.model = model.to(device)
         self.model_name = model_name
@@ -345,6 +347,8 @@ class Learner():
             rln_state_dict = self.model.model.bert.state_dict()
         
         torch.save(rln_state_dict, log_rln_weights)
+        os.chmod(rln_state_dict, self.access_mode)
+        
         logged_rln_paths.append(log_rln_weights)
         logged_f1s.append(zero_shot.get('f1'))
         best_f1 = zero_shot.get('f1')
@@ -381,6 +385,7 @@ class Learner():
                             best_state_dict = self.model.state_dict()
                         
                         torch.save(best_state_dict, best_path)
+                        os.chmod(best_state_dict, self.access_mode)
                         
                         # for multi-gpu
                         if isinstance(best_model, nn.DataParallel):
@@ -418,6 +423,7 @@ class Learner():
                         rln_state_dict = best_model.model.bert.state_dict()
                     
                     torch.save(rln_state_dict, log_rln_weights)
+                    os.chmod(rln_state_dict, self.access_mode)
                     
                     # record f1 and rln weights path
                     logged_rln_paths.append(log_rln_weights)

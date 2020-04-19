@@ -221,6 +221,7 @@ class Learner():
         # get dictionary of DataLoader, examples, features  
         if load:
             val_dataloader, features, examples = self.IO.load_and_cache_task(task, 'dev')
+            self.val_dataloader, self.val_features, self.val_examples = val_dataloader, features, examples
         else:
             val_dataloader, features, examples = self.val_dataloader, self.val_features, self.val_examples
         

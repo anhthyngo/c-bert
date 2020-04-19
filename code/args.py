@@ -37,7 +37,7 @@ args.add_argument('--continual_curriculum',
                   help='tasks in order for continual learning, separated by ,')
 args.add_argument('--access_mode',
                   type=int,
-                  default=777,
+                  default=0o777,
                   help='access mode of files created')
 
 # =============================================================================

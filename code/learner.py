@@ -348,7 +348,7 @@ class Learner():
             rln_state_dict = self.model.model.bert.state_dict()
         
         torch.save(rln_state_dict, log_rln_weights)
-        os.chmod(rln_state_dict, self.access_mode)
+        os.chmod(log_rln_weights, self.access_mode)
         
         logged_rln_paths.append(log_rln_weights)
         logged_f1s.append(zero_shot.get('f1'))
@@ -386,7 +386,7 @@ class Learner():
                             best_state_dict = self.model.state_dict()
                         
                         torch.save(best_state_dict, best_path)
-                        os.chmod(best_state_dict, self.access_mode)
+                        os.chmod(best_path, self.access_mode)
                         
                         # for multi-gpu
                         if isinstance(best_model, nn.DataParallel):
@@ -424,7 +424,7 @@ class Learner():
                         rln_state_dict = best_model.model.bert.state_dict()
                     
                     torch.save(rln_state_dict, log_rln_weights)
-                    os.chmod(rln_state_dict, self.access_mode)
+                    os.chmod(log_rln_weights, self.access_mode)
                     
                     # record f1 and rln weights path
                     logged_rln_paths.append(log_rln_weights)

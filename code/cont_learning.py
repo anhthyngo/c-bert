@@ -93,7 +93,7 @@ class ContLearner():
         
         for i, prev_task in enumerate(prev_tasks):
             # load best weights of previous task
-            best_prev_weights = os.path.join(self.save_dir, "{}_{}_best.pt".format(self.hf_model_nam, prev_task))
+            best_prev_weights = os.path.join(self.save_dir, "{}_{}_best.pt".format(self.hf_model_name, prev_task))
             
             if isinstance(self.unsupervised_model, nn.DataParallel):
                 self.unsupervised_model.module.load_state_dict(torch.load(best_prev_weights))

@@ -419,9 +419,9 @@ class Learner():
                     
                     # for mulit-gpu
                     if isinstance(best_model, nn.DataParallel):
-                        rln_state_dict = best_model.module.model.bert.state_dict()
+                        rln_state_dict = self.model.module.model.bert.state_dict()
                     else:
-                        rln_state_dict = best_model.model.bert.state_dict()
+                        rln_state_dict = self.model.model.bert.state_dict()
                     
                     torch.save(rln_state_dict, log_rln_weights)
                     os.chmod(log_rln_weights, self.access_mode)

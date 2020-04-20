@@ -306,6 +306,7 @@ class Learner():
         if model_name is None:
             model_name = self.model_name
         
+        current_f1 = None
         cum_loss =  0.0
         best_f1 = 0
         best_iter = 0
@@ -409,8 +410,11 @@ class Learner():
                 # save every log_int
                 if global_step % self.log_int == 0:
                     log.info("="*40+" Storing data for plotting on task {} step {}".format(task, global_step))
-                    log_results = self.evaluate(task, best_model, prefix = '{}_log'.format(task))
-                    log_f1 = log_results.get('f1')
+                    if self.log_int != self.best_int:
+                        log_results = self.evaluate(task, best_model, prefix = '{}_log'.format(task))
+                        log_f1 = log_results.get('f1')
+                    elif not current_f1 is None:
+                        log_f1 = current_f1
                     
                     log_rln_weights = os.path.join(task_log_dir, '{}.pt'.format(global_step))
                     

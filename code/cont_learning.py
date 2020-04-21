@@ -61,8 +61,8 @@ class ContLearner():
                     prev_task_rln_weights = os.path.join(self.log_dir,
                                                          self.hf_model_name,
                                                          prev_task,
-                                                         '{}.pt'.format(self.max_steps))
-                    assert os.path.exists(prev_task_rln_weights), "Previous best RLN weights do not exist or have not been trained: {}".format(prev_task_rln_weights)
+                                                         "{}_{}_best_rln.pt".format(self.hf_model_name, prev_task))
+                    assert os.path.exists(prev_task_rln_weights), "Previous best weights do not exist or have not been trained: {}".format(prev_task_rln_weights)
                     
                     # load best RLN weights for previous task
                     if isinstance(self.unsupervised_model, nn.DataParallel):
@@ -93,7 +93,7 @@ class ContLearner():
         
         for i, prev_task in enumerate(prev_tasks):
             # load best weights of previous task
-            best_prev_weights = os.path.join(self.save_dir, "{}_{}_best.pt".format(self.hf_model_name, prev_task))
+            best_prev_weights = os.path.join(self.log_dir, self.hf_model_name, prev_task, "{}_{}_best.pt".format(self.hf_model_name, prev_task))
             
             if isinstance(self.unsupervised_model, nn.DataParallel):
                 self.unsupervised_model.module.load_state_dict(torch.load(best_prev_weights))

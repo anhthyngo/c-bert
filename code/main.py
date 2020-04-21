@@ -66,7 +66,8 @@ def main():
     print("{}".format(parser.experiment))
     
     # set tokenizer and config from Huggingface
-    tokenizer = transformers.AutoTokenizer.from_pretrained(parser.model)
+    tokenizer = transformers.AutoTokenizer.from_pretrained(parser.model,
+                                                           do_lower_case=parser.do_lower_case)
     config = transformers.AutoConfig.from_pretrained(parser.model)
     
     # create IO object and import data

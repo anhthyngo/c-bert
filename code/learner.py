@@ -321,7 +321,8 @@ class Learner():
         if not os.path.exists(task_log_dir):
             os.mkdir(task_log_dir)
         
-        best_path = os.path.join(self.save_dir, model_name + '_{}_best.pt'.format(task))
+        best_path = os.path.join(task_log_dir, model_name + '_{}_best.pt'.format(task))
+        best_rln_path = os.path.join(task_log_dir, model_name + '_{}_best_rln.pt'.format(task))
         best_model = copy.deepcopy(self.model)
         
         # load data
@@ -383,10 +384,13 @@ class Learner():
                         # for multi-gpu
                         if isinstance(self.model, nn.DataParallel):
                             best_state_dict = self.model.module.state_dict()
+                            best_rln_state_dict = self.model.module.model.bert.state_dict()
                         else:
                             best_state_dict = self.model.state_dict()
+                            best_rln_state_dict = self.model.model.bert.state_dict()
                         
                         torch.save(best_state_dict, best_path)
+                        torch.save(best_rln_state_dict, best_rln_path)
                         os.chmod(best_path, self.access_mode)
                         
                         # for multi-gpu

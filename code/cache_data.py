@@ -68,8 +68,8 @@ def main(parser):
 if __name__=="__main__":
     args = argparse.ArgumentParser(description='Cache Data')
     args.add_argument('--idx', type=int)
-    args.add_argument('--data_dir', type=str)
-    args.add_argument('--cache_dir', type=str)
-    args.add_argument('--log_dir', type=str)
+    args.add_argument('--data_dir', type=str, default=r'C:\Users\Willi\Documents\NYU\2020 Spring\NLU\Project\Projects\MetaLearning\Data_Exploration\data')
+    args.add_argument('--cache_dir', type=str,default= r'C:\Users\Willi\Documents\NYU\2020 Spring\NLU\Project\Projects\MetaLearning\Data_Exploration\cached_data')
+    args.add_argument('--log_dir', type=str, default = r'C:\Users\Willi\Documents\NYU\2020 Spring\NLU\Project\Projects\MetaLearning\Data_Exploration\cache_log')
     parser = args.parse_args()
     main(parser)

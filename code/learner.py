@@ -271,9 +271,12 @@ class Learner():
             output_null_log_odds_file,
             self.verbose_logging,
             self.version_2_with_negative,
-            self.null_score_diff_threshold,
-            self.IO.tokenizer
-            )
+            self.null_score_diff_threshold,)
+# =============================================================================
+#             self.IO.tokenizer
+#             )
+#            ^^ for transformers v 2.8.0
+# =============================================================================
         
         # compute F1 and exact scores
         results = sq_metrics.squad_evaluate(examples, predictions)

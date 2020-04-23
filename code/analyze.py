@@ -36,7 +36,7 @@ def plot_learning(
         score_type = "F1",               # score type for label name
         linewidth = 1.0,                 # linewidth for plot
         offset = 10,                     # pixel offset for axes
-        label_x_offset = 1,              # x direction offset for label
+        label_x_offset = 200,              # x direction offset for label
         label_y_offset = 1,              # y direction offset for label
         x_size = 10,                     # x size of figure
         y_size = 5,                      # y size of figure
@@ -44,7 +44,7 @@ def plot_learning(
         x_tick_int = 20000,              # interval for ticks on x-axis
         iterations = 100000,             # max number of training iterations
         y_label = "score",               # name for y-axis
-        y_tick_int = 20,                 # interval for ticks on y-axis
+        y_tick_int = 10,                 # interval for ticks on y-axis
         max_score = 100                  # max score
         ):
     """

@@ -1,0 +1,14 @@
+name: cbert
+channels:
+    - pytorch
+dependencies:
+    - python
+    - pytorch
+    - torchvision
+    - numpy
+    - scikit-learn
+    - pandas
+    - pip
+    - pip:
+        - transformers==2.3.0
+        - tqdm

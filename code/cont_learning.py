@@ -41,7 +41,9 @@ class ContLearner():
 # =============================================================================
 # Methods to do continual learning
 # =============================================================================
-    def c_learn(self):
+    def c_learn(self,
+                rln_only = False # bool whether to only carry RLN weights to next task
+                ):
         """
         Method to fine-tune continual learning on curriculum.
     
@@ -58,17 +60,31 @@ class ContLearner():
                 
                 # load best weights from previous task
                 if not prev_task is None:
-                    prev_task_rln_weights = os.path.join(self.log_dir,
+                    prev_task_weights_pre = os.path.join(self.log_dir,
                                                          self.hf_model_name,
-                                                         prev_task,
-                                                         "{}_{}_best_rln.pt".format(self.hf_model_name, prev_task))
-                    assert os.path.exists(prev_task_rln_weights), "Previous best weights do not exist or have not been trained: {}".format(prev_task_rln_weights)
+                                                         prev_task)
                     
                     # load best RLN weights for previous task
-                    if isinstance(self.unsupervised_model, nn.DataParallel):
-                        self.unsupervised_model.module.model.bert.load_state_dict(torch.load(prev_task_rln_weights))
+                    if rln_only:
+                        prev_task_weights = os.path.join(prev_task_weights_pre, 
+                                                         "{}_{}_best_rln.pt".format(
+                                                             self.hf_model_name, 
+                                                             prev_task))
+                        
+                        if isinstance(self.unsupervised_model, nn.DataParallel):
+                            self.unsupervised_model.module.model.bert.load_state_dict(torch.load(prev_task_weights))
+                        else:
+                            self.unsupervised_model.model.bert.load_state_dict(torch.load(prev_task_weights))
                     else:
-                        self.unsupervised_model.model.bert.load_state_dict(torch.load(prev_task_rln_weights))
+                        prev_task_weights = os.path.join(prev_task_weights_pre,
+                                                         "{}_{}_best.pt".format(
+                                                             self.hf_model_name, 
+                                                             prev_task))
+                        
+                        if isinstance(self.unsupervised_model, nn.DataParallel):
+                            self.unsupervised_model.module.model.load_state_dict(torch.load(prev_task_weights))
+                        else:
+                            self.unsupervised_model.model.load_state_dict(torch.load(prev_task_weights))
                     
                     log.info("Reset learner object for task {}".format(task))
                     self.learner.model = copy.deepcopy(self.unsupervised_model)

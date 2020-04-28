@@ -103,12 +103,8 @@ args.add_argument('--batch_size',
                   help='batch size')
 
 # =============================================================================
-# for training
+# for continual training
 # =============================================================================
-args.add_argument('--meta_steps',
-                  type=int,
-                  default=100,
-                  help='number of updates for meta-learning')
 args.add_argument('--fine_tune_steps', 
                   type=int, 
                   default=100000,
@@ -167,6 +163,17 @@ args.add_argument("--do_lower_case",
 args.add_argument('--version_2_with_negative',
                   action='store_true',
                   help='whether negative examples exist like in SQuADv2')
+args.add_argument('--carry_rln_only',
+                  action='store_true',
+                  help='whether to only use RLN for continual learning')
+
+# =============================================================================
+# for meta_learning
+# =============================================================================
+args.add_argument('--meta_steps',
+                  type=int,
+                  default=100,
+                  help='number of updates for meta-learning')
 
 # =============================================================================
 # mixed point precision

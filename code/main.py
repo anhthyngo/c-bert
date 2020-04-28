@@ -130,7 +130,7 @@ def main():
     
     log.info("Starting Continual Learning")
     if not parser.no_cont_learning:
-        c_learner.c_learn()
+        c_learner.c_learn(rln_only = parser.carry_rln_only)
     
     if len(parser.continual_curriculum) > 1 and not parser.no_forget_eval:
         c_learner.evaluate_forgetting()

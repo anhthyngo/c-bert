@@ -133,7 +133,7 @@ def main():
         c_learner.c_learn(rln_only = parser.carry_rln_only)
     
     if len(parser.continual_curriculum) > 1 and not parser.no_forget_eval:
-        c_learner.evaluate_forgetting()
+        c_learner.evaluate_forgetting(rln_only = parser.carry_rln_only)
     
         log.info("Generating Plot")
         # generate BERT plot

@@ -128,6 +128,28 @@ class Learner():
             
         self.optimizer = opt.AdamW(optimizer_grouped_parameters, lr=self.lr, eps=self.eps)
     
+    def save_log_weights(self, task_log_dir, idx):
+        """
+        Helper method to save down logged weights
+        """
+        log_weights = os.path.join(task_log_dir, '{}.pt'.format(0))
+        log_rln_weights = os.path.join(task_log_dir, '{}_rln.pt'.format(0))
+        
+        # for mulit-gpu
+        if isinstance(self.model, nn.DataParallel):
+            state_dict = self.model.module.state_dict()
+            rln_state_dict = self.model.module.model.bert.state_dict()
+        else:
+            state_dict = self.model.state_dict()
+            rln_state_dict = self.model.model.bert.state_dict()
+        
+        torch.save(state_dict, log_weights)
+        torch.save(rln_state_dict, log_rln_weights)
+        os.chmod(log_weights, self.access_mode)
+        os.chmod(log_rln_weights, self.access_mode)
+        
+        return log_weights, log_rln_weights
+    
     def train_step(self,
                    batch,
                    idx,
@@ -309,6 +331,7 @@ class Learner():
         best_f1 = 0
         best_iter = 0
         logged_rln_paths = []
+        logged_paths = []
         logged_f1s = []
         model_log_dir = os.path.join(self.log_dir, model_name)
         task_log_dir = os.path.join(model_log_dir, task)
@@ -339,18 +362,11 @@ class Learner():
         # log baseline zero-shot
         log.info("Storing results for zero-shot on task: {}".format(task))
         zero_shot = self.evaluate(task, prefix = '{}_current'.format(task))
-        log_rln_weights = os.path.join(task_log_dir, '{}.pt'.format(0))
         
-        # for mulit-gpu
-        if isinstance(self.model, nn.DataParallel):
-            rln_state_dict = self.model.module.model.bert.state_dict()
-        else:
-            rln_state_dict = self.model.model.bert.state_dict()
-        
-        torch.save(rln_state_dict, log_rln_weights)
-        os.chmod(log_rln_weights, self.access_mode)
-        
+        log_weights, log_rln_weights = self.save_log_weights(task_log_dir, 0)
         logged_rln_paths.append(log_rln_weights)
+        logged_paths.append(log_weights)
+        
         logged_f1s.append(zero_shot.get('f1'))
         best_f1 = zero_shot.get('f1')
         
@@ -381,8 +397,8 @@ class Learner():
                         
                         # for multi-gpu
                         if isinstance(self.model, nn.DataParallel):
-                            best_state_dict = self.model.module.state_dict()
-                            best_rln_state_dict = self.model.module.model.bert.state_dict()
+                            best_state_dict = self.model.module.model.state_dict()
+                            best_rln_state_dict = self.model.module.bert.state_dict()
                         else:
                             best_state_dict = self.model.state_dict()
                             best_rln_state_dict = self.model.model.bert.state_dict()
@@ -413,26 +429,15 @@ class Learner():
                 if global_step % self.log_int == 0:
                     log.info("="*40+" Storing data for plotting on task {} step {}".format(task, global_step))
                     if self.log_int != self.best_int:
-                        log_results = self.evaluate(task, best_model, prefix = '{}_log'.format(task))
+                        log_results = self.evaluate(task, prefix = '{}_log'.format(task))
                         log_f1 = log_results.get('f1')
                     elif not current_f1 is None:
                         log_f1 = current_f1
                     
-                    log_rln_weights = os.path.join(task_log_dir, '{}.pt'.format(global_step))
-                    
-                    # save weights
-                    # only supports bert right now
-                    
-                    # for mulit-gpu
-                    if isinstance(best_model, nn.DataParallel):
-                        rln_state_dict = self.model.module.model.bert.state_dict()
-                    else:
-                        rln_state_dict = self.model.model.bert.state_dict()
-                    
-                    torch.save(rln_state_dict, log_rln_weights)
-                    os.chmod(log_rln_weights, self.access_mode)
+                    log_weights, log_rln_weights = self.save_log_weights(task_log_dir, global_step)
                     
                     # record f1 and rln weights path
+                    logged_paths.append(log_weights)
                     logged_rln_paths.append(log_rln_weights)
                     logged_f1s.append(log_f1)
                 
@@ -456,4 +461,4 @@ class Learner():
                 )
             )
         
-        return logged_rln_paths, logged_f1s, best_path
+        return logged_paths, logged_rln_paths, logged_f1s, best_path

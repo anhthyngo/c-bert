@@ -47,7 +47,8 @@ class Learner():
                  weight_decay = 0.0,
                  lr = 5e-3,
                  eps = 1e-8,
-                 warmup_steps = 0
+                 warmup_steps = 0,
+                 freeze_embeddings,
                  ):
         """
         Object to store learning. Used for fine-tuning.
@@ -72,9 +73,10 @@ class Learner():
         self.lr = lr
         self.eps = eps
         self.warmup_steps = warmup_steps
-        self.log_dir = os.path.join(self.save_dir, 'logged')
+        self.freeze = freeze_embeddings
         
         # make directory for recorded weights if doesn't already exist
+        self.log_dir = os.path.join(self.save_dir, 'logged')
         if not os.path.exists(self.log_dir):
             os.mkdir(self.log_dir)
         
@@ -113,15 +115,21 @@ class Learner():
         """
         Set optimizer for learner object using model.
         """
-        # don't apply weight decay to bias and LayerNorm weights
+        # only adjust qa_outputs if doing feature extraction
+        if self.freeze:
+            named_params = self.model.model.qa_outputs.named_parameters()
+        else:
+            named_params = self.model.named_parameters()
+        
+        # don't apply weight decay to bias and LayerNorm weights     
         no_decay = ['bias', 'LayerNorm.weight']
         optimizer_grouped_parameters = [
             {
-                "params"       : [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
+                "params"       : [p for n, p in named_params if not any(nd in n for nd in no_decay)],
                 "weight_decay" : self.weight_decay
             },
             {
-                "params"       : [p for n, p in self.model.named_parameters() if any(nd in n for nd in no_decay)],
+                "params"       : [p for n, p in named_params if any(nd in n for nd in no_decay)],
                 "weight_decay" : 0.0
             }
         ]

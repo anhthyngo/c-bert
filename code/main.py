@@ -119,7 +119,8 @@ def main():
                               weight_decay = parser.weight_decay,
                               lr = parser.learning_rate,
                               eps = parser.adam_epsilon,
-                              warmup_steps = parser.warmup_steps)
+                              warmup_steps = parser.warmup_steps,
+                              freeze_embeddings = parser.freeze_embeddings,)
     
     # create continual learning object and perform continual learning
     c_learner = cont_learning.ContLearner(parser.model,

@@ -174,6 +174,9 @@ args.add_argument('--meta_steps',
                   type=int,
                   default=100,
                   help='number of updates for meta-learning')
+args.add_argument('--freeze_embeddings',
+                  action='store_true',
+                  help='whether to do feature extraction')
 
 # =============================================================================
 # mixed point precision

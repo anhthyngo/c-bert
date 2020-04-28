@@ -1,4 +1,4 @@
-# Meta-BERT: Learning Robust Contextual Representations for Continual Learning
+# cBERT: A Meta-Learning Approach to Contextual Representations for Continual Learning
 
 <img src="https://github.com/anhthyngo/meta-bert/blob/master/img/bert-img.jpeg " width="900">
 

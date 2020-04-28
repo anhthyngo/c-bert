@@ -82,9 +82,9 @@ class ContLearner():
                                                              prev_task))
                         
                         if isinstance(self.unsupervised_model, nn.DataParallel):
-                            self.unsupervised_model.module.model.load_state_dict(torch.load(prev_task_weights))
+                            self.unsupervised_model.module.load_state_dict(torch.load(prev_task_weights))
                         else:
-                            self.unsupervised_model.model.load_state_dict(torch.load(prev_task_weights))
+                            self.unsupervised_model.load_state_dict(torch.load(prev_task_weights))
                     
                     log.info("Reset learner object for task {}".format(task))
                     self.learner.model = copy.deepcopy(self.unsupervised_model)

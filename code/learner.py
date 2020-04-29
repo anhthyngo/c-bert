@@ -428,9 +428,9 @@ class Learner():
                         
                         # for multi-gpu
                         if isinstance(best_model, nn.DataParallel):
-                            best_model.module.load_state_dict(torch.load(best_path))
+                            best_model.module.model.load_state_dict(torch.load(best_path))
                         else:
-                            best_model.load_state_dict(torch.load(best_path))
+                            best_model.model.load_state_dict(torch.load(best_path))
                 
                 # write to log every verbose_int
                 if global_step % self.verbose_int == 0:

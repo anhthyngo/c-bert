@@ -92,9 +92,9 @@ class ContLearner():
             best_prev_weights = os.path.join(self.log_dir, self.hf_model_name, prev_task, "{}_{}_best.pt".format(self.hf_model_name, prev_task))
             
             if isinstance(self.unsupervised_model, nn.DataParallel):
-                self.unsupervised_model.module.load_state_dict(torch.load(best_prev_weights))
+                self.unsupervised_model.module.model.load_state_dict(torch.load(best_prev_weights))
             else:
-                self.unsupervised_model.load_state_dict(torch.load(best_prev_weights))
+                self.unsupervised_model.model.load_state_dict(torch.load(best_prev_weights))
             
             # evaluate forgetting for each log_int of last task
             for j in np.arange(start=0, stop=(self.max_steps+self.log_int), step=self.log_int).tolist():
@@ -134,7 +134,7 @@ class ContLearner():
         else:
             # load entire model
             last_task_weights = os.path.join(pre_name, post_name + file_type)
-            temp_model.load_state_dict(torch.load(last_task_weights))
+            temp_model.model.load_state_dict(torch.load(last_task_weights))
             
 # =============================================================================
 #             if isinstance(self.unsupervised_model, nn.DataParallel):

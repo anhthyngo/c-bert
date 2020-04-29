@@ -27,10 +27,6 @@ args.add_argument('--run_log',
                   type=str,
                   default=os.path.join(os.getcwd(),'log'),
                   help='where to print run log')
-args.add_argument('--meta_tasks',
-                  type=str,
-                  default='NewsQA,SearchQA,HotpotQA,NaturalQuestionsShort',
-                  help='tasks for meta learning, separated by ,')
 args.add_argument('--continual_curriculum',
                   type=str,
                   default='SQuAD,TriviaQA-web',
@@ -170,13 +166,37 @@ args.add_argument('--carry_rln_only',
 # =============================================================================
 # for meta_learning
 # =============================================================================
-args.add_argument('--meta_steps',
-                  type=int,
-                  default=100,
-                  help='number of updates for meta-learning')
 args.add_argument('--freeze_embeddings',
                   action='store_true',
                   help='whether to do feature extraction')
+args.add_argument('--meta_update_lr',
+                  type=float,
+                  default=3e-5,
+                  help='task-level learning rate of meta learning')
+args.add_argument('--meta_meta_lr',
+                  type=float,
+                  default=0.01,
+                  help='meta-level learning rate of meta learning')
+args.add_argument('--meta_inner_update_steps',
+                  type=int,
+                  default=10,
+                  help='task-level update steps of meta learning')
+args.add_argument('--meta_outer_update_steps',
+                  type=int,
+                  default=40000,
+                  help='number of meta-learning steps')
+args.add_argument('--meta_tasks',
+                  type=str,
+                  default='NewsQA,SearchQA,HotpotQA,NaturalQuestionsShort',
+                  help='tasks for meta learning, separated by ,')
+args.add_argument('--n_meta_tasks',
+                  type=int,
+                  default=3,
+                  help='number of meta tasks to sample')
+args.add_argument('--n_meta_task_samples',
+                  type=int,
+                  default=5000,
+                  help='number of samples per meta task')
 
 # =============================================================================
 # mixed point precision

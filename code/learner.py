@@ -48,7 +48,7 @@ class Learner():
                  lr = 5e-3,
                  eps = 1e-8,
                  warmup_steps = 0,
-                 freeze_embeddings,
+                 freeze_embeddings = False,
                  ):
         """
         Object to store learning. Used for fine-tuning.
@@ -94,6 +94,10 @@ class Learner():
         self.val_examples = None
         self.val_features = None
         
+        # stop embedding weight grad tracking
+        if self.freeze:
+            self.no_embedding_grads()
+        
         # set optimizer
         self.optimizer = optimizer
         
@@ -110,6 +114,13 @@ class Learner():
         if torch.cuda.is_available() and torch.cuda.device_count() > 1:
             self.model = nn.DataParallel(model)
             self.model.to(self.device)
+    
+    def no_embedding_grads(self):
+        """
+        Method to freeze embedding weights
+        """
+        for param in self.model.model.bert.parameters():
+            param.requires_grad = False
     
     def set_optimizer(self):
         """

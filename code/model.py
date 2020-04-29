@@ -14,6 +14,7 @@ import torch
 import torch.nn as nn
 import transformers
 import os
+import copy
 
 
 # ============================ Set up a QA Model from Huggingface ============================
@@ -57,6 +58,7 @@ class QAModel(nn.Module):
         inputs_embeds = None,
         start_positions = None,
         end_positions = None,
+        fast_weights = None,
     ):
         """
         Forward used to feed Huggingface model.
@@ -64,17 +66,33 @@ class QAModel(nn.Module):
         Returns output as specified below
 
         """
-        outputs = self.model(
-            input_ids = input_ids,
-            attention_mask = attention_mask,
-            token_type_ids = token_type_ids,
-            position_ids = position_ids,
-            head_mask = head_mask,
-            inputs_embeds = inputs_embeds,
-            start_positions = start_positions,
-            end_positions = end_positions
-            )
-    
+        if fast_weights is None:
+            outputs = self.model(
+                input_ids = input_ids,
+                attention_mask = attention_mask,
+                token_type_ids = token_type_ids,
+                position_ids = position_ids,
+                head_mask = head_mask,
+                inputs_embeds = inputs_embeds,
+                start_positions = start_positions,
+                end_positions = end_positions
+                )
+        else:
+            temp_model = copy.deepcopy(self.model)
+            for i, parameter in enumerate(temp_model.parameters()):
+                parameter = fast_weights[i]
+            
+            outputs = temp_model(
+                input_ids = input_ids,
+                attention_mask = attention_mask,
+                token_type_ids = token_type_ids,
+                position_ids = position_ids,
+                head_mask = head_mask,
+                inputs_embeds = inputs_embeds,
+                start_positions = start_positions,
+                end_positions = end_positions
+                )
+            
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)
 
     def print_param(self):

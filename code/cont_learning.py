@@ -64,7 +64,11 @@ class ContLearner():
                     prev_task_weights_pre = os.path.join(self.log_dir,
                                                          self.hf_model_name,
                                                          prev_task)
-                    self.load_unsupervised_weights(prev_task_weights_pre, "{}_{}_best".format(self.hf_model_name, prev_task), ".pt", rln_only)
+                    
+                    self.load_unsupervised_weights(prev_task_weights_pre,
+                                                   "{}_{}_best".format(self.hf_model_name, prev_task),
+                                                   ".pt",
+                                                   rln_only)
                     
                     log.info("Reset learner object for task {}".format(task))
                     self.learner.model = copy.deepcopy(self.unsupervised_model)
@@ -89,12 +93,13 @@ class ContLearner():
         
         for i, prev_task in enumerate(prev_tasks):
             # load best weights of previous task
-            best_prev_weights = os.path.join(self.log_dir, self.hf_model_name, prev_task, "{}_{}_best.pt".format(self.hf_model_name, prev_task))
+            best_prev_weights_pre = os.path.join(self.log_dir,
+                                                 self.hf_model_name,
+                                                 prev_task)
             
-            if isinstance(self.unsupervised_model, nn.DataParallel):
-                self.unsupervised_model.module.model.load_state_dict(torch.load(best_prev_weights))
-            else:
-                self.unsupervised_model.model.load_state_dict(torch.load(best_prev_weights))
+            self.load_unsupervised_weights(best_prev_weights_pre,
+                                           "{}_{}_best.pt".format(self.hf_model_name, prev_task),
+                                           ".pt", False)
             
             # evaluate forgetting for each log_int of last task
             for j in np.arange(start=0, stop=(self.max_steps+self.log_int), step=self.log_int).tolist():
@@ -103,7 +108,10 @@ class ContLearner():
                 last_task_weights_pre = os.path.join(self.log_dir, 
                                                      self.hf_model_name, 
                                                      last_task)
-                self.load_unsupervised_weights(last_task_weights_pre, "{}".format(j), ".pt", rln_only)
+                self.load_unsupervised_weights(last_task_weights_pre,
+                                               "{}".format(j),
+                                               ".pt",
+                                               rln_only)
                                     
                 zero_results = self.learner.evaluate(prev_task, 
                                                      self.unsupervised_model, 
@@ -124,21 +132,8 @@ class ContLearner():
             # only load RLN weights
             last_task_weights = os.path.join(pre_name, post_name + "_rln" + file_type)
             temp_model.model.bert.load_state_dict(torch.load(last_task_weights))
-            
-# =============================================================================
-#             if isinstance(self.unsupervised_model, nn.DataParallel):
-#                 self.unsupervised_model.module.model.bert.load_state_dict(torch.load(last_task_weights))
-#             else:
-#                 self.unsupervised_model.model.bert.load_state_dict(torch.load(last_task_weights))
-# =============================================================================
+
         else:
             # load entire model
             last_task_weights = os.path.join(pre_name, post_name + file_type)
-            temp_model.model.load_state_dict(torch.load(last_task_weights))
-            
-# =============================================================================
-#             if isinstance(self.unsupervised_model, nn.DataParallel):
-#                 self.unsupervised_model.module.load_state_dict(torch.load(last_task_weights))
-#             else:
-#                 self.unsupervised_model.load_state_dict(torch.load(last_task_weights))
-# =============================================================================
+            temp_model.load_state_dict(torch.load(last_task_weights))

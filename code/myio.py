@@ -88,8 +88,9 @@ class IO:
 # Methods to read data
 # =============================================================================
     def load_and_cache_task(self,
-                            task,  # task data to load
-                            use    # use case. either train or dev
+                            task,      # task data to load
+                            use,       # use case. either train or dev
+                            bs = None, # batch_size override
                             ):
         """
         Load and cache task data. Based on hugging face run_squad example:
@@ -105,6 +106,9 @@ class IO:
         and SquadExamples
         """
         start = time.time()
+        
+        if bs is None:
+            bs = self.batch_size
         
         # make sure use is either train or dev
         try:
@@ -163,13 +167,33 @@ class IO:
         else:
             sampler = SequentialSampler(dataset)
             
-        dl = DataLoader(dataset, sampler=sampler, batch_size=self.batch_size)
+        dl = DataLoader(dataset, sampler=sampler, batch_size=bs)
         
         log.info("Task {} took {:.6f}s".format(task, time.time()-start))
         
         return dl, features, examples   
     
-    def export_results(self):
+    def sample_dl(self, task = None, samples = 100, use = 'train'):
         """
-        Export results of analysis
+        Sample `samples` number of samples from DataLoader for `task` for both
+        trajectory and random
+        --------------------
+        Return:
+        traj      - sample for trajectory
+        rnd       - sample random trajectory
         """
+        
+        traj = []
+        rand = []
+        
+        dl, _, _ = self.load_and_cache_task(task, use)
+        
+        for i, batch in enumerate(dl):
+            if i < samples:
+                traj.append(batch)
+            elif i >= samples and i < 2*samples:
+                rand.append(batch)
+            else:
+                break
+        
+        return traj, rand

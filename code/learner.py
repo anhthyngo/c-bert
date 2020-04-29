@@ -419,7 +419,7 @@ class Learner():
                             best_state_dict = self.model.module.model.state_dict()
                             best_rln_state_dict = self.model.module.model.bert.state_dict()
                         else:
-                            best_state_dict = self.model.state_dict()
+                            best_state_dict = self.model.model.state_dict()
                             best_rln_state_dict = self.model.model.bert.state_dict()
                         
                         torch.save(best_state_dict, best_path)

@@ -417,7 +417,7 @@ class Learner():
                         # for multi-gpu
                         if isinstance(self.model, nn.DataParallel):
                             best_state_dict = self.model.module.model.state_dict()
-                            best_rln_state_dict = self.model.module.bert.state_dict()
+                            best_rln_state_dict = self.model.module.model.bert.state_dict()
                         else:
                             best_state_dict = self.model.state_dict()
                             best_rln_state_dict = self.model.model.bert.state_dict()

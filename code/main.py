@@ -1,7 +1,5 @@
 """
-Main run script to execute experiments and analysis
-
-TO DO: Meta-Learning (OML)
+Main run script to execute continual learning evaluation
 """
 
 import torch
@@ -71,7 +69,10 @@ def main():
     config = transformers.AutoConfig.from_pretrained(parser.model)
     
     # create IO object and import data
-    cache_dir = os.path.join(parser.save_dir, 'cached_data', parser.model)
+    cache_head = os.path.join(parser.save_dir, 'cached_data')
+    cache_dir = os.path.join(cache_head, parser.model)
+    if not os.path.exists(cache_head):
+        os.mkdir(cache_head)
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
     

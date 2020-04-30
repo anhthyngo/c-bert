@@ -98,7 +98,7 @@ class ContLearner():
                                                  prev_task)
             
             self.load_unsupervised_weights(best_prev_weights_pre,
-                                           "{}_{}_best.pt".format(self.hf_model_name, prev_task),
+                                           "{}_{}_best".format(self.hf_model_name, prev_task),
                                            ".pt", False)
             
             # evaluate forgetting for each log_int of last task

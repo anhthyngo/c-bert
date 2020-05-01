@@ -151,8 +151,8 @@ class Learner():
         """
         Helper method to save down logged weights
         """
-        log_weights = os.path.join(task_log_dir, '{}.pt'.format(0))
-        log_rln_weights = os.path.join(task_log_dir, '{}_rln.pt'.format(0))
+        log_weights = os.path.join(task_log_dir, '{}.pt'.format(idx))
+        log_rln_weights = os.path.join(task_log_dir, '{}_rln.pt'.format(idx))
         
         # for mulit-gpu
         if isinstance(self.model, nn.DataParallel):

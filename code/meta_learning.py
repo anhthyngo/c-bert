@@ -25,7 +25,7 @@ from args import args, check_args  # module for parsing arguments for program
 
 def main():
     """
-    Main method for experiment
+    Main method for meta-learning
     """ 
     start = time.time()
     repository = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -86,7 +86,7 @@ def main():
                            cache=True
                            )
     
-    #TODO: set oml
+    # set oml
     oml = meta_learner.MetaLearningClassification(update_lr     = parser.meta_update_lr,
                                                   meta_lr       = parser.meta_meta_lr,
                                                   update_step   = parser.meta_inner_update_steps,
@@ -96,10 +96,10 @@ def main():
                                                   max_grad_norm = parser.max_grad_norm,
                                                   device        = device)
     
-    #TODO: freeze_layers
+    # freeze_layers
     oml.freeze_rln()
     
-    #TODO: do meta_learning
+    # do meta_learning
     meta_tasks = parser.meta_tasks.split(',')
     
     meta_steps = trange(0, parser.meta_outer_update_steps, desc = 'Meta Outer', mininterval=30)
@@ -122,7 +122,7 @@ def main():
     
     # save RLN weights
     meta_RLN_head = os.path.join(parser.save_dir, "meta_weights")
-    meta_RLN_weights = os.path.join(meta_RLN_head, parser.exp_name + "_META_WEIGHTS.pt")
+    meta_RLN_weights = os.path.join(meta_RLN_head, parser.exp_name + "_meta_weights.pt")
     if not os.path.exist(meta_RLN_head):
         os.mkdir(meta_RLN_head)
     
@@ -136,7 +136,7 @@ def main():
     
     log.info("Meta loss is {}".format(loss))
     log.info("Saved meta weights at {}".format(meta_RLN_weights))
-    log.info("Total time is: {}min : {}s".format((time.time()-start)//60, (time.time()-start)%60))
+    log.info("Total time is: {} min : {} s".format((time.time()-start)//60, (time.time()-start)%60))
     
 if __name__ == "__main__":
     main()

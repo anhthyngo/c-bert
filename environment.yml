@@ -3,8 +3,7 @@ channels:
     - pytorch
 dependencies:
     - python
-    - pytorch
-    - torchvision
+    - pytorch==1.4
     - numpy
     - scikit-learn
     - pandas

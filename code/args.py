@@ -171,19 +171,15 @@ args.add_argument('--freeze_embeddings',
                   help='whether to do feature extraction')
 args.add_argument('--meta_update_lr',
                   type=float,
-                  default=3e-5,
+                  default=3e-2,
                   help='task-level learning rate of meta learning')
 args.add_argument('--meta_meta_lr',
                   type=float,
-                  default=0.01,
+                  default=3e-5,
                   help='meta-level learning rate of meta learning')
-args.add_argument('--meta_inner_update_steps',
+args.add_argument('--meta_steps',
                   type=int,
-                  default=10,
-                  help='task-level update steps of meta learning')
-args.add_argument('--meta_outer_update_steps',
-                  type=int,
-                  default=40000,
+                  default=1000,
                   help='number of meta-learning steps')
 args.add_argument('--meta_tasks',
                   type=str,
@@ -195,7 +191,7 @@ args.add_argument('--n_meta_tasks',
                   help='number of meta tasks to sample')
 args.add_argument('--n_meta_task_samples',
                   type=int,
-                  default=5000,
+                  default=100,
                   help='number of samples per meta task')
 
 # =============================================================================

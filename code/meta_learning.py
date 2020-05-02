@@ -89,7 +89,6 @@ def main():
     # set oml
     oml = meta_learner.MetaLearningClassification(update_lr     = parser.meta_update_lr,
                                                   meta_lr       = parser.meta_meta_lr,
-                                                  update_step   = parser.meta_inner_update_steps,
                                                   hf_model_name = parser.model,
                                                   config        = config,
                                                   myio          = data_handler,
@@ -102,7 +101,7 @@ def main():
     # do meta_learning
     meta_tasks = parser.meta_tasks.split(',')
     
-    meta_steps = trange(0, parser.meta_outer_update_steps, desc = 'Meta Outer', mininterval=30)
+    meta_steps = trange(0, parser.meta_steps, desc = 'Meta Outer', mininterval=30)
     for step in meta_steps:
         
         # sample tasks

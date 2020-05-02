@@ -16,7 +16,6 @@ class MetaLearningClassification(nn.Module):
     def __init__(self,
                  update_lr = 1e-4,     # task-level inner update learning rate
                  meta_lr = 0.01,       # meta-level outer learning rate
-                 update_step = 10,     # task-level inner update steps
                  hf_model_name = None, # Hugginface model name
                  config = None,        # Huggingface configuration object
                  myio = None,          # myio object
@@ -147,13 +146,13 @@ class MetaLearningClassification(nn.Module):
         """
 
         :param d_traj:   Batched data of sampled trajectory
-        :param d_traj:   Input data of the random batch of data
-        :return:
+        :param d_rand:   Input data of the random batch of data
+        :return: meta-loss
         """
         # reset classification layer
         self.reset_layer()
 
-        meta_losses = [0 for _ in range(self.update_step + 1)]  # losses_q[i] is the loss on step i
+        meta_losses = [0 for _ in range(len(d_traj) + 1)]  # losses_q[i] is the loss on step i
         # f1_meta_set = [0 for _ in range(self.update_step + 1)]
 
         # Doing a single inner update to get updated weights
@@ -176,7 +175,7 @@ class MetaLearningClassification(nn.Module):
 #             accuracy_meta_set[1] = accuracy_meta_set[1] + classification_accuracy
 # =============================================================================
 
-        for k in range(1, self.update_step):
+        for k in range(1, len(d_traj)):
             # Doing inner updates using fast weights
             fast_weights = self.inner_update(d_traj[k], fast_weights)
 

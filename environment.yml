@@ -1,13 +1,16 @@
 name: cbert
 channels:
+    - anaconda
     - pytorch
 dependencies:
-    - python
-    - pytorch==1.4
-    - numpy
-    - scikit-learn
-    - pandas
+    - python==3.7.6
+    - pytorch==1.4.0
+    - numpy==1.18.1
+    - scikit-learn==0.22
+    - pandas==1.0.3
+    - matplotlib
     - pip
     - pip:
         - transformers==2.3.0
-        - tqdm
+        - tqdm==4.43
+        - torch==1.4.0

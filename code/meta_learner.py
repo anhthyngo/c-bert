@@ -62,13 +62,13 @@ class MetaLearningClassification(nn.Module):
         """
         Method to freeze RLN parameters
         """
-        for name, param in model.named_parameters():
-            param.learn = True
-
         if isinstance(self.net, nn.DataParallel):
             model = self.net.module.model
         else:
             model = self.net.model
+
+        for name, param in model.named_parameters():
+            param.learn = True
 
         for name, param in model.bert.named_parameters():
             param.learn = True

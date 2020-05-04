@@ -27,7 +27,6 @@ class MetaLearningClassification(nn.Module):
 
         self.update_lr = update_lr
         self.meta_lr = meta_lr
-        self.update_step = update_step
 
         self.net = model.QAModel(hf_model_name, config)
         self.optimizer = optim.Adam(self.net.parameters(), lr=self.meta_lr)

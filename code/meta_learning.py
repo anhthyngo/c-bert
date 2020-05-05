@@ -122,7 +122,7 @@ def main():
     # save RLN weights
     meta_RLN_head = os.path.join(parser.save_dir, "meta_weights")
     meta_RLN_weights = os.path.join(meta_RLN_head, parser.experiment + "_meta_weights.pt")
-    if not os.path.exist(meta_RLN_head):
+    if not os.path.exists(meta_RLN_head):
         os.mkdir(meta_RLN_head)
     
     # for multi-GPU

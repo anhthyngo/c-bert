@@ -120,6 +120,7 @@ class Learner():
 
             for param in bert.parameters():
                 param.requires_grad = False
+            log.info("Froze BERT parameters")
 
     def no_embedding_grads(self):
         """

@@ -56,7 +56,10 @@ class MetaLearningClassification(nn.Module):
             model = self.net.model
         
         for weight in model.qa_outputs.parameters():
-            torch.nn.init.kaiming_normal_(weight)
+            if len(weight.shape)>1:
+                torch.nn.init.kaiming_normal_(weight)
+            else:
+                torch.nn.init.zeros_(weight)
     
     def freeze_rln(self):
         """

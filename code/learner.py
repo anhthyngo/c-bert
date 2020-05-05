@@ -94,10 +94,6 @@ class Learner():
         self.val_examples = None
         self.val_features = None
         
-        # stop embedding weight grad tracking
-        if self.freeze:
-            self.no_embedding_grads()
-        
         # set optimizer
         self.optimizer = optimizer
         
@@ -114,7 +110,17 @@ class Learner():
         if torch.cuda.is_available() and torch.cuda.device_count() > 1:
             self.model = nn.DataParallel(model)
             self.model.to(self.device)
-    
+
+        # stop embedding weight grad tracking
+        if self.freeze:
+            if isinstance(self.model, nn.DataParallel):
+                bert = self.model.module.model.bert
+            else:
+                bert = self.model.model.bert
+
+            for param in bert.parameters():
+                param.requires_grad = False
+
     def no_embedding_grads(self):
         """
         Method to freeze embedding weights

@@ -5,6 +5,7 @@ import torch
 from torch import nn
 from torch import optim
 from torch.nn import functional as F
+from tqdm import tqdm, trange
 
 import model
 
@@ -181,7 +182,7 @@ class MetaLearningClassification(nn.Module):
 #             accuracy_meta_set[1] = accuracy_meta_set[1] + classification_accuracy
 # =============================================================================
 
-        for k in range(1, len(d_traj)):
+        for k in trange(1, len(d_traj), desc='Meta Inner', mininterval=30):
             # Doing inner updates using fast weights
             fast_weights = self.inner_update(d_traj[k], fast_weights)
 

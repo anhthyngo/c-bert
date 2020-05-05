@@ -60,6 +60,13 @@ args.add_argument('--model',
                            'bert-base-cased',
                            'bert-large-uncased',
                            'bert-large-cased'})
+args.add_argument('--load_rln',
+                  action='store_true',
+                  help='whether to preload rln weights')
+args.add_argument('--rln_weights',
+                  type=str,
+                  default='',
+                  help='file with rln weights for preloading')
 
 # =============================================================================
 # for dataloading

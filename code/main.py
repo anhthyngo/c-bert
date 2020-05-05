@@ -94,7 +94,10 @@ def main():
     parser.continual_curriculum = parser.continual_curriculum.split(',')
     
     # create BERT model
-    BERTmodel = model.QAModel(parser.model, config)
+    BERTmodel = model.QAModel(parser.model,
+                              config,
+                              load_rln = parser.load_rln,
+                              rln_weights = parser.rln_weights,)
     
     # create learner object for BERT model
     trainer = learner.Learner(parser.access_mode,

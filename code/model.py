@@ -45,7 +45,7 @@ class QAModel(nn.Module):
         # load meta learned weights 
         # only supporting BERT for now
         if load_rln:
-            assert os.path.exist(rln_weights), "Path for meta-learned weights does not exist"
+            assert os.path.exists(rln_weights), "Path for meta-learned weights does not exist"
             self.model.bert.load_state_dict(torch.load(rln_weights))
 
     def forward(
@@ -58,7 +58,6 @@ class QAModel(nn.Module):
         inputs_embeds = None,
         start_positions = None,
         end_positions = None,
-        fast_weights = None,
     ):
         """
         Forward used to feed Huggingface model.
@@ -66,32 +65,16 @@ class QAModel(nn.Module):
         Returns output as specified below
 
         """
-        if fast_weights is None:
-            outputs = self.model(
-                input_ids = input_ids,
-                attention_mask = attention_mask,
-                token_type_ids = token_type_ids,
-                position_ids = position_ids,
-                head_mask = head_mask,
-                inputs_embeds = inputs_embeds,
-                start_positions = start_positions,
-                end_positions = end_positions
-                )
-        else:
-            temp_model = copy.deepcopy(self.model)
-            for param, fast in zip(temp_model.parameters(), fast_weights):
-                param = fast
-            
-            outputs = temp_model(
-                input_ids = input_ids,
-                attention_mask = attention_mask,
-                token_type_ids = token_type_ids,
-                position_ids = position_ids,
-                head_mask = head_mask,
-                inputs_embeds = inputs_embeds,
-                start_positions = start_positions,
-                end_positions = end_positions
-                )
+        outputs = self.model(
+            input_ids = input_ids,
+            attention_mask = attention_mask,
+            token_type_ids = token_type_ids,
+            position_ids = position_ids,
+            head_mask = head_mask,
+            inputs_embeds = inputs_embeds,
+            start_positions = start_positions,
+            end_positions = end_positions
+            )
             
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)
 

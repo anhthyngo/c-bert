@@ -6,6 +6,7 @@ from torch import nn
 from torch import optim
 from torch.nn import functional as F
 from tqdm import tqdm, trange
+import copy
 
 import model
 
@@ -39,6 +40,9 @@ class MetaLearningClassification(nn.Module):
             self.net = nn.DataParallel(self.net)
             
         self.net.to(device)
+
+        self.fast_net = copy.deepcopy(self.net)
+        self.fast_net.to(device)
 
 # =============================================================================
 #     def reset_classifer(self, class_to_reset):
@@ -93,10 +97,16 @@ class MetaLearningClassification(nn.Module):
             "token_type_ids"  : batch[2],
             "start_positions" : batch[3],
             "end_positions"   : batch[4],
-            "fast_weights"    : fast_weights,
             }
-        
-        out = self.net(**inputs)
+
+        if fast_weights is None:
+            net = self.net
+        else:
+            net = self.fast_net
+            for fast_net_param, fast_weight in zip(net.parameters(), fast_weights):
+                fast_net_param = fast_weight
+
+        out = net(**inputs)
         loss = out[0]
         
         # for multi-gpu
@@ -104,12 +114,8 @@ class MetaLearningClassification(nn.Module):
             loss = loss.mean() # average on multi-gpu parallel training
 
         if fast_weights is None:
-            if isinstance(self.net, nn.DataParallel):
-                model = self.net.module.model
-            else:
-                model = self.net.model
-            fast_weights = model.parameters()
-        #
+            fast_weights = self.net.parameters()
+
         grad = torch.autograd.grad(loss, fast_weights, allow_unused=True)
 
         fast_weights = list(
@@ -132,10 +138,15 @@ class MetaLearningClassification(nn.Module):
                 "token_type_ids"  : batch[2],
                 "start_positions" : batch[3],
                 "end_positions"   : batch[4],
-                "fast_weights"    : fast_weights,
                 }
-            
-            out = self.net(**inputs)
+            if fast_weights is None:
+                net = self.net
+            else:
+                net = self.fast_net
+                for fast_net_param, fast_weight in zip(net.parameters(), fast_weights):
+                    fast_net_param = fast_weight
+
+            out = net(**inputs)
             loss = out[0]
             
             # for multi-gpu

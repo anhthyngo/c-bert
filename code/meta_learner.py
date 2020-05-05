@@ -124,6 +124,8 @@ class MetaLearningClassification(nn.Module):
         
         losses = 0
         for i, batch in enumerate(batches):
+            batch = tuple(t.to(self.device) for t in batch)
+
             inputs = {
                 "input_ids"       : batch[0],
                 "attention_mask"  : batch[1],

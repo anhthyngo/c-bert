@@ -79,8 +79,8 @@ class QAModel(nn.Module):
                 )
         else:
             temp_model = copy.deepcopy(self.model)
-            for i, parameter in enumerate(temp_model.parameters()):
-                parameter = fast_weights[i]
+            for param, fast in zip(temp_model.parameters(), fast_weights):
+                param = fast
             
             outputs = temp_model(
                 input_ids = input_ids,

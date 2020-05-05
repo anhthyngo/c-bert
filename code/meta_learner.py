@@ -103,7 +103,11 @@ class MetaLearningClassification(nn.Module):
             loss = loss.mean() # average on multi-gpu parallel training
 
         if fast_weights is None:
-            fast_weights = self.net.model.parameters()
+            if isinstance(self.net, nn.DataParallel):
+                model = self.net.module.model
+            else:
+                model = self.net.model
+            fast_weights = model.parameters()
         #
         grad = torch.autograd.grad(loss, fast_weights, allow_unused=True)
 

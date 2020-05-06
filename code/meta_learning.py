@@ -43,7 +43,7 @@ def main():
     )
     log.basicConfig(filename=log_name,
                     format='%(asctime)s | %(name)s -- %(message)s',
-                    level=log.DEBUG)
+                    level=log.INFO)
     os.chmod(log_name, parser.access_mode)
     
     # set devise to CPU if available
@@ -118,6 +118,8 @@ def main():
             d_rand += task_rand
             
         loss = oml(d_traj, d_rand)
+        if step % parser.verbose_steps == 0:
+            log.info(f"OML Loss is {loss} | Step {step}")
     
     # save RLN weights
     meta_RLN_head = os.path.join(parser.save_dir, "meta_weights")

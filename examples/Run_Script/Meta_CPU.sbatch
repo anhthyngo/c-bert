@@ -3,7 +3,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=64000
-#SBATCH --time=48:00:00
+#SBATCH --time=86:00:00
 #SBATCH --mail-type=END
 #SBATCH --mail-user=wh629@nyu.edu
 #SBATCH --job-name="meta"
@@ -35,7 +35,7 @@ IN_LR=0.003                       # inner learning rate
 OUT_LR=0.00003                    # meta learning rate
 STEPS=10000                       # number of meta steps
 N_META_TASKS=2                    # number of tasks for per update
-N_META_SAMPLES=10                 # number of samples per task per inner update
+N_META_SAMPLES=15                 # number of samples per task per inner update
 META_TASKS=NewsQA,HotpotQA,NaturalQuestionsShort     # tasks to sample from. can't use searchQA because too big even for 64GB
 
 

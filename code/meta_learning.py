@@ -100,7 +100,13 @@ def main():
     
     # do meta_learning
     meta_tasks = parser.meta_tasks.split(',')
-    
+
+    # create save path
+    meta_RLN_head = os.path.join(parser.save_dir, "meta_weights")
+    if not os.path.exists(meta_RLN_head):
+        os.mkdir(meta_RLN_head)
+    meta_RLN_weights = os.path.join(meta_RLN_head, parser.experiment + "_meta_weights.pt")
+
     meta_steps = trange(0, parser.meta_steps, desc = 'Meta Outer', mininterval=30)
     for step in meta_steps:
         
@@ -120,23 +126,18 @@ def main():
         loss = oml(d_traj, d_rand)
         if step % parser.verbose_steps == 0:
             log.info(f"OML Loss is {loss} | Step {step}")
-    
-    # save RLN weights
-    meta_RLN_head = os.path.join(parser.save_dir, "meta_weights")
-    meta_RLN_weights = os.path.join(meta_RLN_head, parser.experiment + "_meta_weights.pt")
-    if not os.path.exists(meta_RLN_head):
-        os.mkdir(meta_RLN_head)
-    
-    # for multi-GPU
-    if isinstance(oml.net, nn.DataParallel):
-        weights = oml.net.module.model.bert.state_dict()
-    else:
-        weights = oml.net.model.bert.state_dict()
-    
-    torch.save(weights, meta_RLN_weights)
-    
-    log.info("Meta loss is {}".format(loss))
-    log.info("Saved meta weights at {}".format(meta_RLN_weights))
+
+        # save every meta step
+        # for multi-GPU
+        if isinstance(oml.net, nn.DataParallel):
+            weights = oml.net.module.model.bert.state_dict()
+        else:
+            weights = oml.net.model.bert.state_dict()
+
+        torch.save(weights, meta_RLN_weights)
+        log.info("Meta loss is {}".format(loss))
+        log.info("Saved meta weights at {}".format(meta_RLN_weights))
+
     log.info("Total time is: {} min : {} s".format((time.time()-start)//60, (time.time()-start)%60))
     
 if __name__ == "__main__":

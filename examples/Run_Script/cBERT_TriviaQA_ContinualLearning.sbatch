@@ -7,6 +7,7 @@
 #SBATCH --job-name="24b/4gpu/10k/base"
 #SBATCH --mail-type=END
 #SBATCH --mail-user=wh629@nyu.edu
+#SBATCH --output=<path>/<name>.out
 
 module purge
 module load anaconda3/5.3.1
@@ -34,7 +35,7 @@ SEED=42                           # seed for experiment, Huggingface default is 
 MAX_SEQ=384                       # maximum sequence length for input
 DOC_STRIDE=128                    # stride between windows for Huggingface sliding window
 LR=0.00005                      # learning rate
-RLN_WEIGHTS=<absolute file name for weights>   #<-- additional
+RLN_WEIGHTS=<absolute file name for weights>
 
 
 
@@ -55,8 +56,8 @@ python ./meta-bert/code/main.py \
 	--doc_stride ${DOC_STRIDE} \
 	--no_prev_fine_tune \
 	--do_lower_case \
-	--load_rln \                     #<-- additional
-	--rln_weights ${RLN_WEIGHTS} \   #<-- additional
-	--freeze_embeddings              #<-- additional
+	--load_rln \
+	--rln_weights ${RLN_WEIGHTS} \
+	--freeze_embeddings
 
 	

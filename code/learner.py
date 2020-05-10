@@ -135,7 +135,10 @@ class Learner():
         """
         # only adjust qa_outputs if doing feature extraction
         if self.freeze:
-            named_params = self.model.model.qa_outputs.named_parameters()
+            if isinstance(self.model, nn.DataParallel):
+                named_params = self.model.module.model.qa_outputs.named_parameters()
+            else:
+                named_params = self.model.model.qa_outputs.named_parameters()
         else:
             named_params = self.model.named_parameters()
         

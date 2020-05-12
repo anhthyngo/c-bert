@@ -39,7 +39,7 @@ class MetaLearningClassification(nn.Module):
         if torch.cuda.is_available() and torch.cuda.device_count() > 1:
             self.net = nn.DataParallel(self.net)
 
-        self.fast_net = copy.deepcopy(self.net)
+        self.fast_net = self.net
 
         # send to device
         self.net.to(device)

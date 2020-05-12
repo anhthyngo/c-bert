@@ -150,7 +150,7 @@ def main():
                 changed = True
                 break
 
-        # assert changed, "Weights are the same"
+        assert changed, "Weights are the same"
 
         # save every meta step
         # for multi-GPU

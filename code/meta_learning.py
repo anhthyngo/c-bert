@@ -14,6 +14,7 @@ import sys
 import time
 import json
 from tqdm import trange
+import copy
 
 # =============== Self Defined ===============
 import myio                        # module for handling import/export of data
@@ -100,7 +101,7 @@ def main():
     else:
         rln = oml.net.model.bert
 
-    old_weights = rln.parameters()
+    old_weights = copy.deepcopy(rln.parameters())
 
     # freeze_layers
     oml.freeze_rln()
@@ -145,8 +146,11 @@ def main():
             rln = oml.net.model.bert
 
         for old, new in zip(old_weights, rln.parameters()):
-            if old.data != new.data:
+            if not old.equal(new):
                 changed = True
+                break
+
+        assert changed, "Weights are the same"
 
         # save every meta step
         # for multi-GPU

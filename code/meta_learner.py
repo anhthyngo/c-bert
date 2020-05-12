@@ -181,13 +181,13 @@ class MetaLearningClassification(nn.Module):
         # Taking the meta gradient step
         self.optimizer.zero_grad()
 
-        #self.unfreeze_rln()
+        self.unfreeze_rln()
         meta_loss.backward()
 
         nn.utils.clip_grad_norm_(self.net.parameters(), self.max_grad_norm)
 
         self.optimizer.step()
-        #self.freeze_rln()
+        self.freeze_rln()
 
         return meta_loss
 

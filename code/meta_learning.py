@@ -108,6 +108,7 @@ def main():
     meta_RLN_weights = os.path.join(meta_RLN_head, parser.experiment + "_meta_weights.pt")
 
     meta_steps = trange(0, parser.meta_steps, desc = 'Meta Outer', mininterval=30)
+    running_loss = 0
     for step in meta_steps:
         
         # sample tasks
@@ -124,8 +125,9 @@ def main():
             d_rand += task_rand
             
         loss = oml(d_traj, d_rand)
+        running_loss += loss
         if step % parser.verbose_steps == 0:
-            log.info(f"OML Loss is {loss} | Step {step}")
+            log.info(f"OML Loss is {loss} | Step {step} | Average is {running_loss/max(1,step)}")
 
         # save every meta step
         # for multi-GPU

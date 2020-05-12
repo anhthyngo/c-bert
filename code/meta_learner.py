@@ -78,6 +78,25 @@ class MetaLearningClassification(nn.Module):
         for name, param in model.bert.named_parameters():
             param.learn = False
 
+    def unfreeze_rln(self):
+        """
+        Method to freeze RLN parameters
+        """
+        if isinstance(self.net, nn.DataParallel):
+            model = self.net.module.model
+        else:
+            model = self.net.model
+
+        for name, param in model.named_parameters():
+            param.learn = True
+
+        for name, param in model.bert.named_parameters():
+            param.learn = True
+
+        for name, param in model.bert.named_parameters():
+            param.learn = True
+
+
     def send_batch(self, batch, fast_weights):
         # unpack batch data
         batch = tuple(t.to(self.device) for t in batch)
@@ -161,11 +180,14 @@ class MetaLearningClassification(nn.Module):
 
         # Taking the meta gradient step
         self.optimizer.zero_grad()
+
+        #self.unfreeze_rln()
         meta_loss.backward()
 
         nn.utils.clip_grad_norm_(self.net.parameters(), self.max_grad_norm)
 
         self.optimizer.step()
+        #self.freeze_rln()
 
         return meta_loss
 

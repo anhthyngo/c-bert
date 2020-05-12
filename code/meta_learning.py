@@ -95,6 +95,13 @@ def main():
                                                   max_grad_norm = parser.max_grad_norm,
                                                   device        = device)
     
+    if isinstance(oml.net, nn.DataParallel):
+        rln = oml.net.module.model.bert
+    else:
+        rln = oml.net.model.bert
+
+    old_weights = rln.parameters()
+
     # freeze_layers
     oml.freeze_rln()
     
@@ -129,6 +136,18 @@ def main():
         if step % parser.verbose_steps == 0:
             log.info(f"OML Loss is {loss} | Step {step} | Average is {running_loss/max(1,step)}")
 
+        # check if rln weights are changing
+        changed = False
+
+        if isinstance(oml.net, nn.DataParallel):
+            rln = oml.net.module.model.bert
+        else:
+            rln = oml.net.model.bert
+
+        for old, new in zip(old_weights, rln.parameters()):
+            if old != new:
+                changed = True
+
         # save every meta step
         # for multi-GPU
         if isinstance(oml.net, nn.DataParallel):
@@ -137,7 +156,8 @@ def main():
             weights = oml.net.model.bert.state_dict()
 
         torch.save(weights, meta_RLN_weights)
-        log.info("Meta loss is {}".format(loss))
+        log.info(f"Meta loss is {loss} | Step {step} | Average is {running_loss/max(1,step)}")
+        log.info(f"Changed weights: {changed}")
         log.info("Saved meta weights at {}".format(meta_RLN_weights))
 
     log.info("Total time is: {} min : {} s".format((time.time()-start)//60, (time.time()-start)%60))

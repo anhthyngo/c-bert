@@ -101,7 +101,7 @@ def main():
     else:
         rln = oml.net.model.bert
 
-    old_weights = copy.deepcopy(rln.parameters())
+    old_weights = copy.deepcopy(rln)
 
     # freeze_layers
     oml.freeze_rln()
@@ -145,7 +145,7 @@ def main():
         else:
             rln = oml.net.model.bert
 
-        for old, new in zip(old_weights, rln.parameters()):
+        for old, new in zip(old_weights.parameters(), rln.parameters()):
             if not old.equal(new):
                 changed = True
                 break

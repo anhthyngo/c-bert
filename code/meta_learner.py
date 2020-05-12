@@ -39,11 +39,8 @@ class MetaLearningClassification(nn.Module):
         if torch.cuda.is_available() and torch.cuda.device_count() > 1:
             self.net = nn.DataParallel(self.net)
 
-        self.fast_net = self.net
-
         # send to device
         self.net.to(device)
-        self.fast_net.to(device)
 
     def reset_layer(self):
         """
@@ -112,7 +109,7 @@ class MetaLearningClassification(nn.Module):
         if fast_weights is None:
             net = self.net
         else:
-            net = self.fast_net
+            net = self.net
             for fast_net_param, fast_weight in zip(net.parameters(), fast_weights):
                 if fast_weight.learn == True:
                     fast_net_param = fast_weight

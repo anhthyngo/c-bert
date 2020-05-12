@@ -145,7 +145,7 @@ def main():
             rln = oml.net.model.bert
 
         for old, new in zip(old_weights, rln.parameters()):
-            if old != new:
+            if old.data != new.data:
                 changed = True
 
         # save every meta step

@@ -160,7 +160,7 @@ def main():
             weights = oml.net.model.bert.state_dict()
 
         torch.save(weights, meta_RLN_weights)
-        log.info(f"Meta loss is {loss} | Step {step} | Average is {running_loss/max(1,step)}")
+        log.info(f"Meta loss is {loss} | Step {step} | Average is {running_loss/(step+1)}")
         log.info(f"Changed weights: {changed}")
         log.info("Saved meta weights at {}".format(meta_RLN_weights))
 

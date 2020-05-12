@@ -114,7 +114,8 @@ class MetaLearningClassification(nn.Module):
         else:
             net = self.fast_net
             for fast_net_param, fast_weight in zip(net.parameters(), fast_weights):
-                fast_net_param = fast_weight
+                if fast_weight.learn == True:
+                    fast_net_param = fast_weight
 
         net.train()
         net.to(self.device)

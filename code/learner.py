@@ -148,7 +148,7 @@ class Learner():
                 bert_changed = True
 
         for fq, cq in zip(self.fixed_qa.parameters(),qabert.qa_outputs.parameters()):
-            if not fq.equal(cq):
+            if fq.equal(cq):
                 qa_changed = False
 
         if self.freeze:

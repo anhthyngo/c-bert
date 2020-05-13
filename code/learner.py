@@ -134,7 +134,7 @@ class Learner():
                 self.fixed_bert = copy.deepcopy(qabert.bert)
                 self.fixed_qa = copy.deepcopy(qabert.qa_outputs)
 
-    def check_changing(self):
+    def check_changing(self, step):
         if isinstance(self.model, nn.DataParallel):
             qabert = self.model.module.model
         else:
@@ -144,19 +144,23 @@ class Learner():
         qa_changed = True
 
         bert_count = 0
-        for fb, cb in zip(self.fixed_bert.parameters(),qabert.bert.parameters()):
-            if not fb.equal(cb):
+        bert_changed_n_list = []
+        for fb, (cb_name, cb_data) in zip(self.fixed_bert.parameters(),qabert.bert.named_parameters()):
+            if not fb.equal(cb_data):
                 bert_changed = True
                 bert_count += 1
+                bert_changed_n_list.append(cb_name)
 
         qa_count = 0
-        for fq, cq in zip(self.fixed_qa.parameters(),qabert.qa_outputs.parameters()):
-            if fq.equal(cq):
+        qa_unchanged_n_list = []
+        for fq, (cq_name, cq_data) in zip(self.fixed_qa.parameters(),qabert.qa_outputs.named_parameters()):
+            if fq.equal(cq_data):
                 qa_changed = False
                 qa_count += 1
+                qa_unchanged_n_list.append(cq_name)
 
         if self.freeze:
-            assert qa_changed, f"QA Layer not updating: {qa_changed} | count {qa_count}"
+            assert qa_changed, f"QA Layer not updating: {qa_changed} | count {qa_count} | step {step} | "
             assert not bert_changed, f"Bert Layer updating: {bert_changed} | count {bert_count}"
 
         log.info(f"Bert Changed {bert_changed} | QA_Changed {qa_changed}")
@@ -273,7 +277,11 @@ class Learner():
         #take a step in gradient descent
         self.optimizer.step()
         scheduler.step()
-        
+
+        # check which weights are changing
+        if self.debug:
+            self.check_changing(idx)
+
         # zero gradients
         self.model.zero_grad()
         
@@ -444,12 +452,8 @@ class Learner():
             for step, batch in enumerate(epoch_iterator):
                 
                 self.model.train()
-                iter_loss = self.train_step(batch, step, scheduler)
+                iter_loss = self.train_step(batch, global_step, scheduler)
                 cum_loss += iter_loss
-
-                # check which weights are changing
-                if self.debug:
-                    self.check_changing()
                 
                 # check for best every best_int
                 if global_step % self.best_int == 0:

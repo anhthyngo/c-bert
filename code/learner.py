@@ -143,17 +143,21 @@ class Learner():
         bert_changed = False
         qa_changed = True
 
+        bert_count = 0
         for fb, cb in zip(self.fixed_bert.parameters(),qabert.bert.parameters()):
             if not fb.equal(cb):
                 bert_changed = True
+                bert_count += 1
 
+        qa_count = 0
         for fq, cq in zip(self.fixed_qa.parameters(),qabert.qa_outputs.parameters()):
             if fq.equal(cq):
                 qa_changed = False
+                qa_count += 1
 
         if self.freeze:
-            assert qa_changed, "QA Layer not updating"
-            assert not bert_changed, "Bert Layer updating"
+            assert qa_changed, f"QA Layer not updating: {qa_changed} | count {qa_count}"
+            assert not bert_changed, f"Bert Layer updating: {bert_changed} | count {bert_count}"
 
         log.info(f"Bert Changed {bert_changed} | QA_Changed {qa_changed}")
 

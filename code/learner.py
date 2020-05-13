@@ -55,6 +55,8 @@ class Learner():
         
         Data stored in myio.IO object called myio.
         """
+        self.debug=True
+
         self.fp16 = fp16
         self.fp16_opt_level = fp16_opt_level
         self.access_mode = access_mode
@@ -121,6 +123,39 @@ class Learner():
             for param in bert.parameters():
                 param.requires_grad = False
             log.info("Froze BERT parameters")
+
+            if self.debug:
+                # to check updating
+                if isinstance(self.model, nn.DataParallel):
+                    qabert = self.model.module.model
+                else:
+                    qabert = self.model.model
+
+                self.fixed_bert = copy.deepcopy(qabert.bert)
+                self.fixed_qa = copy.deepcopy(qabert.qa_outputs)
+
+    def check_changing(self):
+        if isinstance(self.model, nn.DataParallel):
+            qabert = self.model.module.model
+        else:
+            qabert = self.model.model
+
+        bert_changed = False
+        qa_changed = True
+
+        for fb, cb in zip(self.fixed_bert.parameters(),qabert.bert.parameters()):
+            if not fb.equals(cb):
+                bert_changed = True
+
+        for fq, cq in zip(self.fixed_qa.parameters(),qabert.qa_outputs.parameters()):
+            if not fq.equals(cq):
+                qa_changed = False
+
+        if self.freeze:
+            assert qa_changed, "QA Layer not updating"
+            assert not bert_changed, "Bert Layer updating"
+
+        log.info(f"Bert Changed {bert_changed} | QA_Changed {qa_changed}")
 
     def no_embedding_grads(self):
         """
@@ -407,6 +442,10 @@ class Learner():
                 self.model.train()
                 iter_loss = self.train_step(batch, step, scheduler)
                 cum_loss += iter_loss
+
+                # check which weights are changing
+                if self.debug:
+                    self.check_changing()
                 
                 # check for best every best_int
                 if global_step % self.best_int == 0:

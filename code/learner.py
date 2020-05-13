@@ -437,14 +437,16 @@ class Learner():
         start = time.time()
         # log baseline zero-shot
         log.info("Storing results for zero-shot on task: {}".format(task))
-        zero_shot = self.evaluate(task, prefix = '{}_current'.format(task))
-        
-        log_weights, log_rln_weights = self.save_log_weights(task_log_dir, 0)
-        logged_rln_paths.append(log_rln_weights)
-        logged_paths.append(log_weights)
-        
-        logged_f1s.append(zero_shot.get('f1'))
-        best_f1 = zero_shot.get('f1')
+
+        if not self.debug:
+            zero_shot = self.evaluate(task, prefix = '{}_current'.format(task))
+
+            log_weights, log_rln_weights = self.save_log_weights(task_log_dir, 0)
+            logged_rln_paths.append(log_rln_weights)
+            logged_paths.append(log_weights)
+
+            logged_f1s.append(zero_shot.get('f1'))
+            best_f1 = zero_shot.get('f1')
         
         self.model.zero_grad()
         for epoch in train_iterator:

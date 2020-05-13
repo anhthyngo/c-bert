@@ -55,7 +55,7 @@ class Learner():
         
         Data stored in myio.IO object called myio.
         """
-        self.debug=True
+        self.debug=False
 
         self.fp16 = fp16
         self.fp16_opt_level = fp16_opt_level
@@ -160,10 +160,10 @@ class Learner():
                 qa_unchanged_n_list.append(cq_name)
 
         if self.freeze:
-            assert qa_changed, f"QA Layer not updating: {qa_changed} | count {qa_count} | step {step} | "
-            assert not bert_changed, f"Bert Layer updating: {bert_changed} | count {bert_count}"
+            assert not bert_changed, f"Bert Layer updating: {bert_changed} | count {bert_count} | step {step} | param_names {bert_changed_n_list}"
+            assert qa_changed, f"QA Layer not updating: {qa_changed} | count {qa_count} | step {step} | param_names {qa_unchanged_n_list}"
 
-        log.info(f"Bert Changed {bert_changed} | QA_Changed {qa_changed}")
+        # log.info(f"Bert Changed {bert_changed} | QA_Changed {qa_changed}")
 
     def no_embedding_grads(self):
         """
@@ -177,28 +177,38 @@ class Learner():
         Set optimizer for learner object using model.
         """
         # only adjust qa_outputs if doing feature extraction
+        # if self.freeze:
+        #     if isinstance(self.model, nn.DataParallel):
+        #         named_params = self.model.module.model.qa_outputs.named_parameters()
+        #     else:
+        #         named_params = self.model.model.qa_outputs.named_parameters()
+        # else:
+        #     named_params = self.model.named_parameters()
+        #
+        # # don't apply weight decay to bias and LayerNorm weights
+        # no_decay = ['bias', 'LayerNorm.weight']
+        # optimizer_grouped_parameters = [
+        #     {
+        #         "params"       : [p for n, p in named_params if not any(nd in n for nd in no_decay)],
+        #         "weight_decay" : self.weight_decay
+        #     },
+        #     {
+        #         "params"       : [p for n, p in named_params if any(nd in n for nd in no_decay)],
+        #         "weight_decay" : 0.0
+        #     }
+        # ]
+        #
+        # self.optimizer = opt.AdamW(optimizer_grouped_parameters, lr=self.lr, eps=self.eps)
+
         if self.freeze:
             if isinstance(self.model, nn.DataParallel):
-                named_params = self.model.module.model.qa_outputs.named_parameters()
+                model = self.model.module.model.qa_outputs
             else:
-                named_params = self.model.model.qa_outputs.named_parameters()
+                model = self.model.model.qa_outputs
         else:
-            named_params = self.model.named_parameters()
-        
-        # don't apply weight decay to bias and LayerNorm weights     
-        no_decay = ['bias', 'LayerNorm.weight']
-        optimizer_grouped_parameters = [
-            {
-                "params"       : [p for n, p in named_params if not any(nd in n for nd in no_decay)],
-                "weight_decay" : self.weight_decay
-            },
-            {
-                "params"       : [p for n, p in named_params if any(nd in n for nd in no_decay)],
-                "weight_decay" : 0.0
-            }
-        ]
-            
-        self.optimizer = opt.AdamW(optimizer_grouped_parameters, lr=self.lr, eps=self.eps)
+            model = self.model
+
+        self.optimizer = opt.Adam(model.parameters(), lr=self.lr, eps=self.eps)
     
     def save_log_weights(self, task_log_dir, idx):
         """
@@ -279,7 +289,7 @@ class Learner():
         scheduler.step()
 
         # check which weights are changing
-        if self.debug:
+        if self.debug and idx > self.warmup_steps:
             self.check_changing(idx)
 
         # zero gradients
@@ -438,15 +448,14 @@ class Learner():
         # log baseline zero-shot
         log.info("Storing results for zero-shot on task: {}".format(task))
 
-        if not self.debug:
-            zero_shot = self.evaluate(task, prefix = '{}_current'.format(task))
+        zero_shot = self.evaluate(task, prefix = '{}_current'.format(task))
 
-            log_weights, log_rln_weights = self.save_log_weights(task_log_dir, 0)
-            logged_rln_paths.append(log_rln_weights)
-            logged_paths.append(log_weights)
+        log_weights, log_rln_weights = self.save_log_weights(task_log_dir, 0)
+        logged_rln_paths.append(log_rln_weights)
+        logged_paths.append(log_weights)
 
-            logged_f1s.append(zero_shot.get('f1'))
-            best_f1 = zero_shot.get('f1')
+        logged_f1s.append(zero_shot.get('f1'))
+        best_f1 = zero_shot.get('f1')
         
         self.model.zero_grad()
         for epoch in train_iterator:

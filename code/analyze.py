@@ -1,5 +1,5 @@
 """
-Module to define analysis methods. Right now can only think of plots.
+Module to define analysis methods.
 """
 
 import torch

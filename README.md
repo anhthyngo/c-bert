@@ -12,7 +12,7 @@ Instructions for running on New York University's Prince computer cluster.
 
 1. Clone repository
 
-   `git clone https://github.com/anhthyngo/c-bert.git`
+   `git clone https://github.com/wh629/c-bert.git`
 
 2. Perform the following commands
 
